@@ -30,6 +30,7 @@
     "dayjs": "1.11.19",
     "dot-prop": "10.1.0",
     "ky": "1.14.3",
+    "lucide-react": "0.564.0",
     "modern-errors": "7.1.4",
     "next": "16.1.6",
     "nuqs": "2.8.8",
