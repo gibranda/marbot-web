@@ -1,0 +1,9 @@
+{
+  "Console Log": {
+    "prefix": "clg",
+    "body": [
+      "console.log(\"🚀 ~ [$TM_FILENAME:$TM_LINE_NUMBER] $1:\", $2);"
+    ],
+    "description": "Console log with file and line"
+  }
+}

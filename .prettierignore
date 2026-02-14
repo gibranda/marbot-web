@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.nuxt
+.next
+.output
+dist
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+
+# Lock files
+package-lock.json
+
+# runtime directories
+.nitro
+.cache
+.data
+
+# IDE
+.vscode
+.idea
+
+# Other
+coverage
+.DS_Store
+.npmrc
+.prettierrc
+favicon.ico
+tsconfig.json

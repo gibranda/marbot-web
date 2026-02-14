@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:3000"
+    environment:
+      URL_API=
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

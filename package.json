@@ -1,23 +1,68 @@
 {
-  "name": "marbot-lms",
+  "name": "nextjs-boilerplate-16",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11.6",
+    "pnpm": "please-use-npm",
+    "yarn": "please-use-npm"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "next telemetry --disable && next dev --port 3000",
+    "build": "next telemetry --disable && next build",
+    "start": "next telemetry --disable && next start --port 8000",
+    "lint": "next telemetry --disable && eslint",
+    "lint:fix": "eslint --fix",
+    "prettier:check": "prettier --check .",
+    "prettier:fix": "prettier --write .",
+    "type-check": "tsc --noEmit --pretty",
+    "packages:update": "npx npm-check-updates --interactive --format group",
+    "git": "./commit-push.sh"
   },
   "dependencies": {
-    "react": "^19.2.4",
-    "lucide-react": "^0.563.0",
-    "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.0"
+    "@mantine/core": "8.3.14",
+    "@mantine/dates": "8.3.14",
+    "@mantine/hooks": "8.3.14",
+    "@sindresorhus/is": "7.2.0",
+    "@tanstack/react-query": "5.90.21",
+    "@tanstack/react-query-devtools": "5.91.3",
+    "dayjs": "1.11.19",
+    "dot-prop": "10.1.0",
+    "ky": "1.14.3",
+    "modern-errors": "7.1.4",
+    "next": "16.1.6",
+    "nuqs": "2.8.8",
+    "path-to-regexp": "8.3.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwind-merge": "3.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@secretlint/secretlint-rule-preset-recommend": "11.3.1",
+    "@tailwindcss/postcss": "^4",
+    "@tanstack/eslint-plugin-query": "5.91.4",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-security": "3.0.1",
+    "eslint-plugin-sonarjs": "3.0.7",
+    "lint-staged": "16.2.7",
+    "postcss": "8.5.6",
+    "postcss-preset-mantine": "1.18.0",
+    "postcss-simple-vars": "7.0.1",
+    "prettier": "3.8.1",
+    "prettier-plugin-tailwindcss": "0.7.2",
+    "secretlint": "11.3.1",
+    "simple-git-hooks": "2.13.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
   }
 }

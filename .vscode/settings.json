@@ -1,0 +1,44 @@
+{
+  "editor.wordWrap": "on",
+  "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.detectIndentation": false,
+  "search.exclude": {
+    "package-lock.json": true
+  },
+  "editor.renderWhitespace": "boundary",
+  "editor.renderControlCharacters": true,
+  "editor.trimAutoWhitespace": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.rulers": [
+    {
+      "column": 80,
+      "color": "#ffff00"
+    },
+    {
+      "column": 100,
+      "color": "#ff0000"
+    },
+    {
+      "column": 120,
+      "color": "#ff0000"
+    }
+  ],
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.filePath": "on",
+  "breadcrumbs.symbolPath": "on",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true
+  },
+  /* eslint */
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.removeUnusedImports": "explicit",
+    "source.organizeImports": "never"
+  },
+  "tailwindCSS.classAttributes": ["className", "classNames"]
+}

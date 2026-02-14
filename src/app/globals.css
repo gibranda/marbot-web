@@ -1,0 +1,50 @@
+@layer theme, base, components, utilities;
+
+@import "@mantine/core/styles.layer.css" layer(components);
+@import "@mantine/dates/styles.layer.css" layer(components);
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+} */
+
+body,
+main {
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+input,
+textarea,
+select,
+button,
+option {
+  font-family: inherit;
+}

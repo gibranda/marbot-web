@@ -1,0 +1,28 @@
+# runtime directories
+.docker
+.npm
+.cache
+.next
+node_modules
+logs
+
+# readme files
+**/*/README.md
+
+# configurations
+.editorconfig
+.git*
+eslint*
+prettier*
+.dockerignore
+Dockerfile*
+docker-compose.*
+
+# specific extensions
+*.md
+*.log*
+.env*
+
+# artifacts
+.DS_Store
+Thumbs.db
