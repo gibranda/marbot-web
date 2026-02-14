@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 
 import {
-  authMiddleware,
-  authPathnameMatcher,
+  // authMiddleware,
+  // authPathnameMatcher,
   devMiddleware,
   devPathnameMatcher,
   publicMiddleware,
@@ -21,9 +21,9 @@ export function proxy(request: NextRequest) {
     return publicMiddleware();
   }
 
-  if (authPathnameMatcher(pathname)) {
-    return authMiddleware(request);
-  }
+  // if (authPathnameMatcher(pathname)) {
+  //   return authMiddleware(request);
+  // }
 }
 
 export const config = {
