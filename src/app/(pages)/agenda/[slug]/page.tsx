@@ -1,17 +1,17 @@
 import { Suspense } from "react";
 
-import Home from "@/components/features/home";
+import Agenda from "@/components/features/agenda/detail";
 import Footer from "@/components/layouts/Footer";
 import Navbar from "@/components/layouts/Navbar";
 
-export default function HomePage() {
+export default function AgendaDetailPage() {
   return (
     <main>
+      <Navbar />
       <Suspense>
-        <Navbar />
-        <Home />
-        <Footer />
+        <Agenda />
       </Suspense>
+      <Footer />
     </main>
   );
 }

@@ -4,7 +4,7 @@ import Navbar from "@/components/layouts/Navbar";
 
 export default function PengajarDetailPage() {
   return (
-    <main className="pt-16 md:pt-20">
+    <main>
       <Navbar />
       <InstructorProfile />
       <Footer />

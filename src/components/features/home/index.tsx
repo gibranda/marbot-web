@@ -11,20 +11,24 @@ import {
   Heart,
   Star,
   ChevronRight,
-  BookOpen,
   MessageCircle,
   HelpCircle,
   ArrowUpRight,
+  MessageSquare,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 
+// Added BookOpen to the lucide-react imports
 import CourseCard from "@/components/common/CourseCard";
-import { MOCK_COURSES, MOCK_INSTRUCTORS, FAQS } from "@/constants/constants";
+import { MOCK_COURSES, MOCK_INSTRUCTORS, FAQS, MOCK_FORUM_THREADS } from "@/constants/constants";
 
 const Home: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const revealRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Intersection Observer for scroll reveal
@@ -49,7 +53,7 @@ const Home: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Handle hash scroll on initial load
+  // Handle hash scroll on initial load or path change
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash) {
       const id = window.location.hash.replace("#", "");
@@ -60,7 +64,7 @@ const Home: React.FC = () => {
         }, 100);
       }
     }
-  }, []);
+  }, [pathname, searchParams]);
 
   const stats = [
     { label: "Materi Ringkas", value: "120+" },
@@ -131,7 +135,7 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Visual Mockup - Hidden on smaller mobile, visible from lg */}
+            {/* Visual Mockup */}
             <div className="group relative hidden lg:block">
               <div className="absolute inset-0 scale-105 rotate-3 rounded-2xl bg-gradient-to-tr from-[#14B8A6] to-[#99F6E4] opacity-20 blur-2xl transition-transform group-hover:rotate-6"></div>
               <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
@@ -245,7 +249,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Courses Section - Implement Horizontal Scroll */}
+      {/* Featured Courses Section */}
       <section
         id="kursus-populer"
         className="reveal-section bg-white pt-16 pb-10 md:pt-24 md:pb-16"
@@ -267,7 +271,6 @@ const Home: React.FC = () => {
             </Link>
           </div>
 
-          {/* Horizontal Scroll Area Implementation */}
           <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-10 sm:-mx-6 sm:px-6 md:gap-8 lg:-mx-8 lg:px-8">
             {MOCK_COURSES.slice(0, 5).map((course, idx) => (
               <div
@@ -287,16 +290,14 @@ const Home: React.FC = () => {
         <div className="stagger-item h-px w-full bg-[#E2E8F0]"></div>
       </div>
 
-      {/* Redesigned Pengajar Section: "Our Team" Style */}
+      {/* Pengajar Section */}
       <section
         id="pengajar-preview"
         className="reveal-section bg-white pt-10 pb-16 md:pt-16 md:pb-24"
         ref={addToRevealRefs}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Large Panel Container */}
           <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm md:p-12 lg:p-16">
-            {/* Header Area */}
             <div className="mb-12 flex flex-col items-start justify-between gap-8 md:mb-16 md:flex-row md:items-end">
               <div className="max-w-xl">
                 <h2 className="mb-4 text-2xl leading-tight font-extrabold text-[#0F172A] md:mb-6 md:text-4xl lg:text-5xl">
@@ -317,7 +318,6 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Team Grid */}
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:gap-10 lg:grid-cols-4">
               {MOCK_INSTRUCTORS.slice(0, 4).map((instructor, idx) => (
                 <div
@@ -325,14 +325,12 @@ const Home: React.FC = () => {
                   className="stagger-item group flex flex-col"
                   style={{ transitionDelay: `${idx * 150}ms` }}
                 >
-                  {/* Portrait Photo Container */}
                   <div className="relative mb-8 aspect-[3/4] overflow-hidden rounded-xl bg-[#F8FAFC] shadow-sm transition-all group-hover:shadow-md">
                     <img
                       src={instructor.avatar}
                       alt={instructor.name}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    {/* Floating Level Badge */}
                     <div className="absolute top-4 left-4">
                       <div className="rounded-lg border border-white bg-white/95 px-3 py-1.5 text-[9px] font-bold tracking-widest text-[#14B8A6] uppercase shadow-sm backdrop-blur-md">
                         {instructor.role.split(" ")[0]}
@@ -340,7 +338,6 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Info Area */}
                   <div className="flex flex-grow flex-col text-center sm:text-left">
                     <h3 className="mb-1 text-lg font-extrabold text-[#0F172A] transition-colors group-hover:text-[#14B8A6] md:text-xl">
                       {instructor.name}
@@ -352,17 +349,16 @@ const Home: React.FC = () => {
                       {instructor.bio}
                     </p>
 
-                    {/* Meta Info Bar */}
                     <div className="mb-6 grid grid-cols-3 gap-2 border-y border-[#F1F5F9] py-4">
                       <div className="flex flex-col items-center">
-                        <div className="mb-1 flex items-center space-x-1">
+                        <div className="mb-1 flex items-center justify-center space-x-1">
                           <Star size={12} className="fill-yellow-400 text-yellow-400" />
                           <span className="text-xs font-bold text-[#0F172A]">{instructor.rating}</span>
                         </div>
                         <span className="text-[9px] font-bold tracking-wider text-[#94A3B8] uppercase">Rating</span>
                       </div>
                       <div className="flex flex-col items-center border-x border-[#F1F5F9]">
-                        <div className="mb-1 flex items-center space-x-1">
+                        <div className="mb-1 flex items-center justify-center space-x-1">
                           <Users size={12} className="text-[#14B8A6]" />
                           <span className="text-xs font-bold text-[#0F172A]">
                             {instructor.totalStudents.toLocaleString()}
@@ -371,7 +367,7 @@ const Home: React.FC = () => {
                         <span className="text-[9px] font-bold tracking-wider text-[#94A3B8] uppercase">Peserta</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="mb-1 flex items-center space-x-1">
+                        <div className="mb-1 flex items-center justify-center space-x-1">
                           <BookOpen size={12} className="text-[#64748B]" />
                           <span className="text-xs font-bold text-[#0F172A]">{instructor.totalCourses}</span>
                         </div>
@@ -379,7 +375,6 @@ const Home: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Profile Link Button */}
                     <Link
                       href={`/pengajar/${instructor.id}`}
                       className="tap-target mt-auto inline-flex w-full items-center justify-center rounded-[10px] border-2 border-[#E2E8F0] py-3 text-xs font-bold text-[#475569] transition-all group-hover:shadow-lg group-hover:shadow-[#14B8A6]/5 hover:border-[#14B8A6] hover:bg-[#F0FDFA] hover:text-[#14B8A6]"
@@ -392,7 +387,6 @@ const Home: React.FC = () => {
               ))}
             </div>
 
-            {/* Mobile-only See All Button */}
             <div className="mt-12 md:hidden">
               <Link
                 href="/pengajar"
@@ -405,13 +399,88 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Catalog Teaser Section - FULL-BLEED */}
+      {/* Forum Highlight Section */}
+      <section
+        id="forum-highlight"
+        className="reveal-section scroll-mt-20 bg-white py-16 md:py-24"
+        ref={addToRevealRefs}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div className="stagger-item">
+              <div className="mb-6 inline-flex items-center space-x-2 rounded-full border border-[#CCFBF1] bg-[#F0FDFA] px-4 py-2">
+                <MessageSquare size={16} className="text-[#14B8A6]" />
+                <span className="text-[10px] font-bold tracking-wider text-[#0F766E] uppercase md:text-xs">
+                  SOUL of the Hub
+                </span>
+              </div>
+              <h2 className="mb-6 text-3xl leading-tight font-extrabold text-[#0F172A] md:text-4xl lg:text-5xl">
+                Forum Takmir & Marbot
+              </h2>
+              <h3 className="mb-6 text-xl font-bold text-[#14B8A6] md:text-2xl">
+                Belajar dari Pengalaman Nyata Antar Masjid
+              </h3>
+              <p className="mb-10 max-w-xl text-sm leading-relaxed text-[#64748B] md:text-lg">
+                Forum Takmir & Marbot adalah ruang diskusi bagi pengurus masjid untuk saling berbagi praktik baik,
+                bertanya solusi operasional, dan mendiskusikan tantangan nyata kemasjidan.
+              </p>
+              <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+                <Link
+                  href="/forum"
+                  className="tap-target flex w-full items-center justify-center rounded-xl bg-[#14B8A6] px-8 py-4 text-center font-bold text-white shadow-lg shadow-[#14B8A6]/20 transition-all hover:bg-[#0F766E] sm:w-auto"
+                >
+                  Masuk ke Forum
+                </Link>
+                <Link
+                  href="/forum"
+                  className="tap-target flex w-full items-center justify-center rounded-xl border-2 border-[#E2E8F0] px-8 py-4 text-center font-bold text-[#0F172A] transition-all hover:border-[#14B8A6] hover:text-[#14B8A6] sm:w-auto"
+                >
+                  Lihat Diskusi Terbaru
+                </Link>
+              </div>
+            </div>
+
+            <div className="stagger-item grid grid-cols-1 gap-4">
+              {MOCK_FORUM_THREADS.slice(0, 3).map((thread) => (
+                <Link
+                  key={thread.id}
+                  href={`/forum/${thread.slug}`}
+                  className="group rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-all hover:border-[#14B8A6] hover:shadow-md"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="rounded-lg border border-[#14B8A6]/10 bg-[#F0FDFA] px-2.5 py-1 text-[9px] font-bold text-[#14B8A6] uppercase">
+                      {thread.category}
+                    </span>
+                    <span className="text-[10px] font-medium text-[#94A3B8]">{thread.timestamp}</span>
+                  </div>
+                  <h4 className="mb-3 line-clamp-1 text-sm font-bold text-[#0F172A] transition-colors group-hover:text-[#14B8A6] sm:text-base">
+                    {thread.title}
+                  </h4>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-[10px] font-bold text-[#64748B]">
+                        {thread.author.charAt(0)}
+                      </div>
+                      <span className="text-xs font-medium text-[#64748B]">{thread.authorMosque}</span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-[#94A3B8]">
+                      <MessageSquare size={12} />
+                      <span className="text-[10px] font-bold">{thread.commentCount}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Catalog Teaser Section */}
       <section
         id="teaser-katalog"
         className="reveal-section relative mb-16 overflow-hidden bg-[#0F766E] py-12 text-white md:mb-24 md:py-20 lg:py-24"
         ref={addToRevealRefs}
       >
-        {/* Decorative background element - smaller on mobile */}
         <div className="pointer-events-none absolute top-0 right-0 p-8 opacity-10 md:p-24">
           <Layout
             size={120}
@@ -479,10 +548,8 @@ const Home: React.FC = () => {
       {/* FAQ Section */}
       <section id="faq" className="reveal-section scroll-mt-20 bg-[#F8FAFC] py-16 md:py-24" ref={addToRevealRefs}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Main FAQ Panel */}
           <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm md:p-12 lg:p-16">
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-16">
-              {/* Column 1 & 2: FAQ List */}
               <div className="space-y-8 lg:col-span-2">
                 <div className="text-center lg:text-left">
                   <div className="mb-4 inline-flex items-center rounded-full border border-[#CCFBF1] bg-[#F0FDFA] px-3 py-1">
@@ -543,7 +610,6 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              {/* Column 3: Help Card */}
               <div className="lg:col-span-1">
                 <div className="sticky top-32 space-y-6">
                   <div className="relative overflow-hidden rounded-xl bg-[#0F766E] p-8 text-white shadow-xl">
@@ -585,7 +651,7 @@ const Home: React.FC = () => {
                       </div>
                       <div className="flex items-center space-x-3 rounded-[10px] border border-[#E2E8F0] bg-white p-3 shadow-sm">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                          <BookOpen size={16} />
+                          <Layout size={16} />
                         </div>
                         <div className="truncate text-xs">
                           <div className="font-bold">Email Support</div>
