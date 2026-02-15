@@ -199,7 +199,63 @@ Mengubah status peserta (aktif/nonaktif/suspended).
 
 ---
 
-## 4. Export Students
+## 4. Reset Student Access
+
+Mereset akses kursus peserta ke kondisi awal (progress kembali ke 0%, lesson completions dihapus). Digunakan jika peserta mengalami masalah teknis atau perlu mengulang materi.
+
+**Endpoint:** `POST /api/v1/admin/students/:id/reset-access`
+
+### Path Parameters
+
+| Parameter | Type | Keterangan |
+|-----------|------|------------|
+| id | string | User UUID |
+
+### Request Body
+
+```json
+{
+  "enrollment_id": "uuid-string",
+  "reason": "Peserta mengalami error saat mengakses modul 3"
+}
+```
+
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| enrollment_id | string | Ya | UUID enrollment yang valid milik student ini |
+| reason | string | Tidak | Alasan reset akses |
+
+### Response — 200 OK
+
+```json
+{
+  "data": {
+    "id": "uuid-string",
+    "enrollment_id": "uuid-string",
+    "course_title": "Standar Operasional Kebersihan Masjid",
+    "progress": 0.00,
+    "status": "ACTIVE",
+    "reset_at": "2025-01-15T12:00:00Z"
+  }
+}
+```
+
+### Response — 404 Not Found
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Enrollment tidak ditemukan untuk peserta ini"
+  }
+}
+```
+
+> **Catatan**: Reset akses akan menghapus semua `lesson_completions` untuk enrollment tersebut dan mengubah `progress` menjadi 0. Status enrollment tetap `ACTIVE`. Jika peserta sudah memiliki sertifikat untuk kursus ini, sertifikat tidak akan dicabut.
+
+---
+
+## 5. Export Students
 
 Mengekspor daftar peserta ke file CSV/Excel.
 

@@ -35,6 +35,13 @@
 | `INACTIVE` | Akun nonaktif | User menonaktifkan akun sendiri, atau admin menonaktifkan | Di-set via profil user atau admin panel |
 | `SUSPENDED` | Akun ditangguhkan | Admin memblokir user karena pelanggaran | Di-set oleh admin melalui admin panel |
 
+### InstructorStatus
+
+| Value | Deskripsi | Kapan Digunakan | Cara Pengisian |
+|-------|-----------|-----------------|----------------|
+| `ACTIVE` | Pengajar aktif, profil dan kursus tampil publik | Default saat pengajar baru ditambahkan | Otomatis (DEFAULT) |
+| `INACTIVE` | Pengajar nonaktif, profil dan kursus disembunyikan | Admin menonaktifkan pengajar sementara | Admin klik "Nonaktifkan" di admin panel |
+
 ### CourseLevel
 
 | Value | Deskripsi | Kapan Digunakan | Cara Pengisian |
@@ -293,10 +300,15 @@ Menyimpan data pengajar/narasumber kursus.
 | Column | Type | Constraints | Deskripsi |
 |--------|------|-------------|-----------|
 | `id` | `UUID` | PK, DEFAULT uuid_generate_v4() | Primary key |
-| `name` | `VARCHAR(255)` | NOT NULL | Nama lengkap |
-| `bio` | `TEXT` | NULLABLE | Biografi |
-| `avatar_url` | `TEXT` | NULLABLE | URL foto |
-| `location` | `VARCHAR(255)` | NULLABLE | Lokasi/kota |
+| `name` | `VARCHAR(255)` | NOT NULL | Nama lengkap & gelar |
+| `email` | `VARCHAR(255)` | NULLABLE, UNIQUE | Email kontak pengajar |
+| `phone` | `VARCHAR(20)` | NULLABLE | Nomor HP/WhatsApp |
+| `bio` | `TEXT` | NULLABLE | Bio singkat (tagline) |
+| `bio_full` | `TEXT` | NULLABLE | Bio lengkap / pengalaman |
+| `avatar_url` | `TEXT` | NULLABLE | URL foto profil |
+| `location` | `VARCHAR(255)` | NULLABLE | Domisili/kota |
+| `status` | `InstructorStatus` | NOT NULL, DEFAULT 'ACTIVE' | Status pengajar |
+| `admin_notes` | `TEXT` | NULLABLE | Catatan internal admin |
 | `created_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu dibuat |
 | `updated_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu terakhir diubah |
 | `created_by` | `UUID` | FK → users.id, NULLABLE | Dibuat oleh |
@@ -305,8 +317,10 @@ Menyimpan data pengajar/narasumber kursus.
 
 **Indexes:**
 - `idx_instructors_name` — on `name`
+- `idx_instructors_email` — UNIQUE on `email`
+- `idx_instructors_status` — on `status`
 
-> **Catatan**: `rating`, `total_courses`, `total_students` dihitung via query dari tabel terkait (`course_reviews`, `courses`, `enrollments`). Spesialisasi diambil via JOIN `instructor_specializations` → `specializations`.
+> **Catatan**: `rating`, `total_courses`, `total_students` dihitung via query dari tabel terkait (`course_reviews`, `courses`, `enrollments`). Spesialisasi diambil via JOIN `instructor_specializations` → `specializations`. Field `email` dan `phone` adalah data kontak publik pengajar, bukan akun login (pengajar tidak memiliki akun user di sistem).
 
 ---
 
@@ -345,6 +359,7 @@ Menyimpan data kursus yang tersedia di platform.
 | `id` | `UUID` | PK, DEFAULT uuid_generate_v4() | Primary key |
 | `title` | `VARCHAR(255)` | NOT NULL | Judul kursus |
 | `slug` | `VARCHAR(255)` | NOT NULL, UNIQUE | URL slug |
+| `summary` | `VARCHAR(500)` | NULLABLE | Ringkasan singkat kursus (ditampilkan di card) |
 | `description` | `TEXT` | NULLABLE | Deskripsi lengkap kursus (mendukung rich text/markdown) |
 | `category_id` | `UUID` | FK → categories.id, NOT NULL | Kategori kursus |
 | `level` | `CourseLevel` | NOT NULL, DEFAULT 'BEGINNER' | Level kesulitan |
@@ -353,6 +368,7 @@ Menyimpan data kursus yang tersedia di platform.
 | `price` | `DECIMAL(12,2)` | NOT NULL, DEFAULT 0 | Harga jual (0 jika FREE) |
 | `original_price` | `DECIMAL(12,2)` | NULLABLE | Harga asli sebelum diskon (ditampilkan coret). NULL = tidak ada diskon |
 | `thumbnail_url` | `TEXT` | NULLABLE | URL gambar thumbnail |
+| `video_promo_url` | `TEXT` | NULLABLE | URL video promosi/trailer kursus (YouTube) |
 | `instructor_id` | `UUID` | FK → instructors.id, NOT NULL | Pengajar |
 | `has_certificate` | `BOOLEAN` | DEFAULT FALSE | Apakah kursus menyediakan sertifikat penyelesaian |
 | `has_lifetime_access` | `BOOLEAN` | DEFAULT TRUE | Akses selamanya setelah enroll |
@@ -891,9 +907,14 @@ erDiagram
     instructors {
         UUID id PK
         VARCHAR name
+        VARCHAR email UK
+        VARCHAR phone
         TEXT bio
+        TEXT bio_full
         TEXT avatar_url
         VARCHAR location
+        InstructorStatus status
+        TEXT admin_notes
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
         UUID created_by FK
@@ -912,6 +933,7 @@ erDiagram
         UUID id PK
         VARCHAR title
         VARCHAR slug UK
+        VARCHAR summary
         TEXT description
         UUID category_id FK
         CourseLevel level
@@ -920,6 +942,7 @@ erDiagram
         DECIMAL price
         DECIMAL original_price
         TEXT thumbnail_url
+        TEXT video_promo_url
         UUID instructor_id FK
         BOOLEAN has_certificate
         BOOLEAN has_lifetime_access
@@ -1238,6 +1261,7 @@ Query default harus menyertakan `WHERE deleted_at IS NULL`.
 | 3 | `refresh_tokens` | Refresh token JWT | - | - |
 | 4 | `categories` | Kategori kursus | - | Ya |
 | 5 | `specializations` | Master keahlian pengajar | - | - |
+
 | 6 | `instructors` | Pengajar | Ya | Ya |
 | 7 | `instructor_specializations` | Relasi pengajar ↔ keahlian | - | - |
 | 8 | `courses` | Kursus | Ya | Ya |

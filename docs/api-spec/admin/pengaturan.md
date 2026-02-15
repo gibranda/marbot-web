@@ -3,11 +3,13 @@
 > Endpoint untuk mengelola pengaturan dan konfigurasi platform.
 
 **Base URL:** `/api/v1/admin`
-**Auth:** Bearer Token (Required, role: admin) — berlaku untuk semua endpoint di file ini.
+**Auth:** Bearer Token (Required, role: ADMIN) — berlaku untuk semua endpoint di file ini.
+
+> **Catatan**: Pengaturan platform disimpan di tabel konfigurasi terpisah (key-value store) atau environment variables, bukan di 22 tabel utama database schema. Endpoint ini mengelola konfigurasi operasional platform.
 
 ---
 
-## 1. Get Pengaturan Umum
+## 1. Get General Settings
 
 Mengambil pengaturan umum platform.
 
@@ -17,7 +19,6 @@ Mengambil pengaturan umum platform.
 
 ```json
 {
-  "success": true,
   "data": {
     "site_name": "Marbot LMS",
     "site_description": "Platform pembelajaran online untuk pengelola masjid",
@@ -36,16 +37,14 @@ Mengambil pengaturan umum platform.
 }
 ```
 
-**Halaman terkait:** `/admin/pengaturan` — [AdminPengaturan.tsx](../../src/pages/admin/AdminPengaturan.tsx)
-
 ---
 
-## 2. Update Pengaturan Umum
+## 2. Update General Settings
 
 Mengubah pengaturan umum platform.
 
-**Endpoint:** `PUT /api/v1/admin/settings/general`
-**Content-Type:** `multipart/form-data`
+**Endpoint:** `PATCH /api/v1/admin/settings/general`
+**Content-Type:** `multipart/form-data` (untuk upload logo/favicon) atau `application/json`
 
 ### Request Body
 
@@ -73,7 +72,8 @@ Mengubah pengaturan umum platform.
 | contact_email | string | Tidak | Format email valid |
 | contact_phone | string | Tidak | Format telepon valid |
 | contact_address | string | Tidak | Max 200 karakter |
-| social_media | object | Tidak | Objek social media links |
+| social_media | object | Tidak | Object berisi key-value social media links |
+| footer_text | string | Tidak | Max 200 karakter |
 | site_logo | file | Tidak | PNG/SVG, max 1MB |
 | site_favicon | file | Tidak | ICO/PNG, max 500KB |
 
@@ -81,14 +81,34 @@ Mengubah pengaturan umum platform.
 
 ```json
 {
-  "success": true,
-  "message": "Pengaturan umum berhasil diperbarui"
+  "data": {
+    "message": "Pengaturan umum berhasil diperbarui",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
+}
+```
+
+### Response — 422 Unprocessable Entity
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Validasi gagal",
+    "details": [
+      {
+        "field": "contact_email",
+        "message": "Format email tidak valid",
+        "code": "invalid_format"
+      }
+    ]
+  }
 }
 ```
 
 ---
 
-## 3. Get Pengaturan Pembayaran
+## 3. Get Payment Settings
 
 Mengambil konfigurasi payment gateway.
 
@@ -98,11 +118,10 @@ Mengambil konfigurasi payment gateway.
 
 ```json
 {
-  "success": true,
   "data": {
     "payment_gateway": "midtrans",
     "is_sandbox": true,
-    "enabled_methods": ["bank_transfer", "e_wallet", "qris"],
+    "enabled_methods": ["BANK_TRANSFER", "E_WALLET", "QRIS", "VIRTUAL_ACCOUNT"],
     "bank_transfer_channels": ["bsi", "bni", "bri", "mandiri"],
     "e_wallet_channels": ["gopay", "shopeepay", "dana"],
     "auto_expire_hours": 24,
@@ -111,13 +130,15 @@ Mengambil konfigurasi payment gateway.
 }
 ```
 
+> **Catatan**: `enabled_methods` menggunakan enum `PaymentMethod` dari database schema. `server_key` tidak ditampilkan di response GET untuk keamanan.
+
 ---
 
-## 4. Update Pengaturan Pembayaran
+## 4. Update Payment Settings
 
 Mengubah konfigurasi payment gateway.
 
-**Endpoint:** `PUT /api/v1/admin/settings/payment`
+**Endpoint:** `PATCH /api/v1/admin/settings/payment`
 
 ### Request Body
 
@@ -125,34 +146,36 @@ Mengubah konfigurasi payment gateway.
 {
   "payment_gateway": "midtrans",
   "is_sandbox": false,
-  "server_key": "SB-Mid-server-xxx",
-  "client_key": "SB-Mid-client-xxx",
-  "enabled_methods": ["bank_transfer", "e_wallet", "qris"],
+  "server_key": "Mid-server-xxx",
+  "client_key": "Mid-client-xxx",
+  "enabled_methods": ["BANK_TRANSFER", "E_WALLET", "QRIS"],
   "auto_expire_hours": 24
 }
 ```
 
 | Field | Type | Required | Validasi |
 |-------|------|----------|----------|
-| payment_gateway | string | Ya | `midtrans`, `xendit` |
-| is_sandbox | boolean | Ya | Mode sandbox/production |
-| server_key | string | Ya | Server key payment gateway |
-| client_key | string | Ya | Client key payment gateway |
-| enabled_methods | array | Ya | Array metode pembayaran yang aktif |
-| auto_expire_hours | number | Tidak | Jam kedaluwarsa pembayaran (default 24) |
+| payment_gateway | string | Tidak | `midtrans`, `xendit` |
+| is_sandbox | boolean | Tidak | Mode sandbox/production |
+| server_key | string | Tidak | Server key payment gateway |
+| client_key | string | Tidak | Client key payment gateway |
+| enabled_methods | array | Tidak | Array dari `BANK_TRANSFER`, `E_WALLET`, `QRIS`, `VIRTUAL_ACCOUNT` |
+| auto_expire_hours | number | Tidak | Jam kedaluwarsa pembayaran, min 1, max 72 |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "message": "Pengaturan pembayaran berhasil diperbarui"
+  "data": {
+    "message": "Pengaturan pembayaran berhasil diperbarui",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
 }
 ```
 
 ---
 
-## 5. Get Pengaturan Email
+## 5. Get Email Settings
 
 Mengambil konfigurasi email/SMTP.
 
@@ -162,7 +185,6 @@ Mengambil konfigurasi email/SMTP.
 
 ```json
 {
-  "success": true,
   "data": {
     "smtp_host": "smtp.gmail.com",
     "smtp_port": 587,
@@ -181,13 +203,15 @@ Mengambil konfigurasi email/SMTP.
 }
 ```
 
+> **Catatan**: `smtp_password` tidak ditampilkan di response GET untuk keamanan.
+
 ---
 
-## 6. Update Pengaturan Email
+## 6. Update Email Settings
 
 Mengubah konfigurasi email.
 
-**Endpoint:** `PUT /api/v1/admin/settings/email`
+**Endpoint:** `PATCH /api/v1/admin/settings/email`
 
 ### Request Body
 
@@ -203,12 +227,24 @@ Mengubah konfigurasi email.
 }
 ```
 
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| smtp_host | string | Tidak | Hostname SMTP server |
+| smtp_port | number | Tidak | Port SMTP (25, 465, 587) |
+| smtp_username | string | Tidak | Username SMTP |
+| smtp_password | string | Tidak | Password SMTP (hanya dikirim saat update) |
+| smtp_encryption | string | Tidak | `tls`, `ssl`, `none` |
+| from_name | string | Tidak | Nama pengirim. Max 100 karakter |
+| from_email | string | Tidak | Email pengirim. Format email valid |
+
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "message": "Pengaturan email berhasil diperbarui"
+  "data": {
+    "message": "Pengaturan email berhasil diperbarui",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
 }
 ```
 
@@ -216,7 +252,7 @@ Mengubah konfigurasi email.
 
 ## 7. Test Email Configuration
 
-Mengirim email test untuk memverifikasi konfigurasi.
+Mengirim email test untuk memverifikasi konfigurasi SMTP.
 
 **Endpoint:** `POST /api/v1/admin/settings/email/test`
 
@@ -228,27 +264,34 @@ Mengirim email test untuk memverifikasi konfigurasi.
 }
 ```
 
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| to_email | string | Ya | Format email valid |
+
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "message": "Email test berhasil dikirim ke admin@marbot.id"
+  "data": {
+    "message": "Email test berhasil dikirim ke admin@marbot.id"
+  }
 }
 ```
 
-### Response — 500 Internal Server Error
+### Response — 422 Unprocessable Entity
 
 ```json
 {
-  "success": false,
-  "message": "Gagal mengirim email. Periksa konfigurasi SMTP Anda."
+  "error": {
+    "code": "smtp_error",
+    "message": "Gagal mengirim email. Periksa konfigurasi SMTP Anda."
+  }
 }
 ```
 
 ---
 
-## 8. Get Pengaturan Sertifikat
+## 8. Get Certificate Settings
 
 Mengambil konfigurasi template sertifikat.
 
@@ -258,7 +301,6 @@ Mengambil konfigurasi template sertifikat.
 
 ```json
 {
-  "success": true,
   "data": {
     "template": "default",
     "prefix": "MARBOT",
@@ -273,12 +315,12 @@ Mengambil konfigurasi template sertifikat.
 
 ---
 
-## 9. Update Pengaturan Sertifikat
+## 9. Update Certificate Settings
 
 Mengubah konfigurasi template sertifikat.
 
-**Endpoint:** `PUT /api/v1/admin/settings/certificate`
-**Content-Type:** `multipart/form-data`
+**Endpoint:** `PATCH /api/v1/admin/settings/certificate`
+**Content-Type:** `multipart/form-data` (untuk upload signature/logo) atau `application/json`
 
 ### Request Body
 
@@ -292,11 +334,47 @@ Mengubah konfigurasi template sertifikat.
 }
 ```
 
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| prefix | string | Tidak | Max 20 karakter, huruf kapital |
+| signatory_name | string | Tidak | Max 100 karakter |
+| signatory_title | string | Tidak | Max 100 karakter |
+| signature_image | file | Tidak | PNG, max 500KB |
+| logo_on_certificate | file | Tidak | PNG, max 1MB |
+
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "message": "Pengaturan sertifikat berhasil diperbarui"
+  "data": {
+    "message": "Pengaturan sertifikat berhasil diperbarui",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
+}
+```
+
+---
+
+## Error Responses (Global)
+
+### 401 Unauthorized
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Token tidak valid atau sudah kadaluarsa"
+  }
+}
+```
+
+### 403 Forbidden
+
+```json
+{
+  "error": {
+    "code": "forbidden",
+    "message": "Anda tidak memiliki akses untuk resource ini"
+  }
 }
 ```

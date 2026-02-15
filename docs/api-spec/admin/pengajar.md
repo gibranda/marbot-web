@@ -19,7 +19,9 @@ Mengambil daftar semua pengajar untuk admin.
 |-----------|------|---------|------------|
 | page | number | 1 | Nomor halaman |
 | per_page | number | 10 | Jumlah per halaman (max 50) |
-| q | string | - | Pencarian berdasarkan nama |
+| q | string | - | Pencarian berdasarkan nama atau email |
+| status | string | - | Filter: `ACTIVE`, `INACTIVE` |
+| specialization_id | string | - | Filter UUID spesialisasi |
 | sort | string | `-created_at` | Sorting: `name`, `-name`, `created_at`, `-created_at`, `-total_courses`, `-total_students`, `-rating` |
 
 ### Response — 200 OK
@@ -30,8 +32,10 @@ Mengambil daftar semua pengajar untuk admin.
     {
       "id": "uuid-string",
       "name": "Ustadz Ahmad Fauzi",
+      "email": "ahmad.fauzi@marbot.id",
       "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg",
       "location": "Jakarta",
+      "status": "ACTIVE",
       "specializations": [
         { "id": "uuid-string", "name": "Praktisi Kemasjidan" }
       ],
@@ -78,9 +82,14 @@ Mengambil detail pengajar beserta daftar kursus yang diajar.
   "data": {
     "id": "uuid-string",
     "name": "Ustadz Ahmad Fauzi",
-    "bio": "Berpengalaman 15 tahun dalam manajemen kebersihan masjid...",
+    "email": "ahmad.fauzi@marbot.id",
+    "phone": "081234567890",
+    "bio": "Praktisi pengelolaan masjid dan penguatan peran marbot.",
+    "bio_full": "Berpengalaman 15 tahun dalam manajemen kebersihan masjid, aktif sebagai trainer nasional...",
     "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg",
     "location": "Jakarta",
+    "status": "ACTIVE",
+    "admin_notes": "Sudah diverifikasi oleh tim admin",
     "specializations": [
       { "id": "uuid-string", "name": "Praktisi Kemasjidan" },
       { "id": "uuid-string", "name": "Takmir & Manajemen Masjid" }
@@ -127,10 +136,14 @@ Menambahkan pengajar baru.
 
 ```json
 {
-  "name": "Ustadz Budi Rahman",
-  "bio": "Pengalaman 10 tahun sebagai takmir masjid...",
+  "name": "Ustadz Budi Rahman, M.Pd",
+  "email": "budi.rahman@marbot.id",
+  "phone": "081234567890",
+  "bio": "Praktisi manajemen masjid modern selama 10 tahun.",
+  "bio_full": "Pengalaman 10 tahun sebagai takmir masjid, aktif di organisasi kemasjidan...",
   "location": "Bandung",
   "specialization_ids": ["uuid-spec-1", "uuid-spec-2"],
+  "admin_notes": "Rekomendasi dari DKM Masjid Agung",
   "avatar": "<file>"
 }
 ```
@@ -138,9 +151,13 @@ Menambahkan pengajar baru.
 | Field | Type | Required | Validasi |
 |-------|------|----------|----------|
 | name | string | Ya | Min 3, max 255 karakter |
-| bio | string | Tidak | Biografi pengajar |
-| location | string | Tidak | Max 255 karakter |
+| email | string | Tidak | Format email valid, UNIQUE |
+| phone | string | Tidak | Max 20 karakter |
+| bio | string | Tidak | Bio singkat (tagline). Max 500 karakter |
+| bio_full | string | Tidak | Bio lengkap / pengalaman |
+| location | string | Tidak | Domisili/kota. Max 255 karakter |
 | specialization_ids | array | Tidak | Array UUID spesialisasi yang valid |
+| admin_notes | string | Tidak | Catatan internal admin (tidak ditampilkan publik) |
 | avatar | file | Tidak | JPG/PNG, max 2MB |
 
 ### Response — 201 Created
@@ -248,7 +265,41 @@ _(empty body)_
 
 ---
 
-## 6. List Instructors for Select
+## 6. Update Instructor Status
+
+Mengubah status aktif/nonaktif pengajar. Saat dinonaktifkan, profil pengajar dan semua kursus miliknya akan disembunyikan dari tampilan publik.
+
+**Endpoint:** `PATCH /api/v1/admin/instructors/:id/status`
+
+### Request Body
+
+```json
+{
+  "status": "INACTIVE"
+}
+```
+
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| status | string | Ya | `ACTIVE`, `INACTIVE` |
+
+### Response — 200 OK
+
+```json
+{
+  "data": {
+    "id": "uuid-string",
+    "status": "INACTIVE",
+    "updated_at": "2025-01-15T12:00:00Z"
+  }
+}
+```
+
+> **Catatan**: Saat status diubah ke `INACTIVE`, semua kursus pengajar ini akan disembunyikan dari katalog publik (tidak mengubah status kursus, hanya tidak ditampilkan). Peserta yang sudah enroll tetap bisa mengakses materi.
+
+---
+
+## 7. List Instructors for Select
 
 Mengambil daftar pengajar ringkas untuk select/dropdown di form kursus.
 
@@ -281,9 +332,9 @@ Mengambil daftar pengajar ringkas untuk select/dropdown di form kursus.
 
 ---
 
-## 7. Specializations (Master Data)
+## 8. Specializations (Master Data)
 
-### 7.1 List Specializations
+### 8.1 List Specializations
 
 **Endpoint:** `GET /api/v1/admin/specializations`
 
@@ -310,7 +361,7 @@ Mengambil daftar pengajar ringkas untuk select/dropdown di form kursus.
 }
 ```
 
-### 7.2 Create Specialization
+### 8.2 Create Specialization
 
 **Endpoint:** `POST /api/v1/admin/specializations`
 
@@ -344,7 +395,7 @@ Mengambil daftar pengajar ringkas untuk select/dropdown di form kursus.
 
 > **Catatan**: `slug` di-generate otomatis dari `name` oleh server.
 
-### 7.3 Update Specialization
+### 8.3 Update Specialization
 
 **Endpoint:** `PATCH /api/v1/admin/specializations/:id`
 
@@ -371,7 +422,7 @@ Mengambil daftar pengajar ringkas untuk select/dropdown di form kursus.
 }
 ```
 
-### 7.4 Delete Specialization
+### 8.4 Delete Specialization
 
 Tidak bisa menghapus spesialisasi yang masih digunakan oleh pengajar.
 

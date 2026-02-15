@@ -47,6 +47,7 @@ Mengambil daftar semua kursus untuk admin.
         "name": "Ustadz Ahmad Fauzi",
         "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg"
       },
+      "summary": "Pelajari cara menjaga masjid tetap wangi, rapi, dan nyaman untuk jamaah 24 jam.",
       "level": "BEGINNER",
       "pricing": "FREE",
       "price": 0,
@@ -97,8 +98,10 @@ Mengambil detail kursus lengkap beserta sections, lessons, dan learning points.
     "id": "uuid-string",
     "title": "Standar Operasional Kebersihan Masjid",
     "slug": "standar-operasional-kebersihan-masjid",
+    "summary": "Pelajari cara menjaga masjid tetap wangi, rapi, dan nyaman untuk jamaah 24 jam.",
     "description": "Pelajari standar kebersihan masjid sesuai panduan terkini...",
     "thumbnail_url": "https://storage.example.com/courses/thumb-1.jpg",
+    "video_promo_url": "https://www.youtube.com/watch?v=promo-xxx",
     "category": {
       "id": "uuid-string",
       "name": "Kebersihan",
@@ -197,6 +200,7 @@ Membuat kursus baru (status default: DRAFT).
 ```json
 {
   "title": "Manajemen Sound System Masjid",
+  "summary": "Panduan praktis setting audio masjid agar jernih dan nyaman.",
   "description": "Panduan lengkap mengelola sound system masjid...",
   "category_id": "uuid-string",
   "instructor_id": "uuid-string",
@@ -207,6 +211,7 @@ Membuat kursus baru (status default: DRAFT).
   "original_price": 200000,
   "has_certificate": true,
   "has_lifetime_access": true,
+  "video_promo_url": "https://www.youtube.com/watch?v=promo-xxx",
   "thumbnail": "<file>"
 }
 ```
@@ -214,6 +219,7 @@ Membuat kursus baru (status default: DRAFT).
 | Field | Type | Required | Validasi |
 |-------|------|----------|----------|
 | title | string | Ya | Min 5, max 255 karakter |
+| summary | string | Tidak | Max 500 karakter. Ringkasan singkat untuk card |
 | description | string | Tidak | Rich text/markdown |
 | category_id | string | Ya | UUID kategori yang valid |
 | instructor_id | string | Ya | UUID pengajar yang valid |
@@ -224,6 +230,7 @@ Membuat kursus baru (status default: DRAFT).
 | original_price | number | Tidak | Harus > price jika diisi |
 | has_certificate | boolean | Tidak | Default `false` |
 | has_lifetime_access | boolean | Tidak | Default `true` |
+| video_promo_url | string | Tidak | URL YouTube video promosi/trailer |
 | thumbnail | file | Tidak | JPG/PNG, max 5MB |
 
 ### Response — 201 Created

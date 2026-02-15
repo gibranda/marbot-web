@@ -147,7 +147,7 @@ Mengubah status transaksi secara manual (misalnya proses refund).
 
 | Field | Type | Required | Validasi |
 |-------|------|----------|----------|
-| status | string | Ya | `REFUNDED` (hanya status ini yang bisa diubah manual oleh admin) |
+| status | string | Ya | `SUCCESS`, `REFUNDED` |
 | notes | string | Tidak | Catatan alasan perubahan status |
 
 ### Response — 200 OK
@@ -169,12 +169,14 @@ Mengubah status transaksi secara manual (misalnya proses refund).
 {
   "error": {
     "code": "invalid_transition",
-    "message": "Hanya transaksi berstatus SUCCESS yang dapat di-refund"
+    "message": "Transisi status tidak valid. PENDING → SUCCESS atau SUCCESS → REFUNDED"
   }
 }
 ```
 
-> **Catatan**: Status `PENDING` → `SUCCESS`/`FAILED`/`EXPIRED` dikelola otomatis oleh webhook payment gateway dan cron job. Admin hanya bisa melakukan `SUCCESS` → `REFUNDED`.
+> **Catatan**: Status `FAILED`/`EXPIRED` dikelola otomatis oleh cron job. Admin dapat melakukan:
+> - `PENDING` → `SUCCESS` (konfirmasi pembayaran manual, misalnya transfer bank yang sudah diverifikasi). Saat dikonfirmasi, enrollment otomatis dibuat untuk peserta.
+> - `SUCCESS` → `REFUNDED` (proses refund atas permintaan peserta).
 
 ---
 
