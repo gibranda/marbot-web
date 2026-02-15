@@ -3,11 +3,11 @@
 > Endpoint untuk monitoring transaksi dan laporan analitik.
 
 **Base URL:** `/api/v1/admin`
-**Auth:** Bearer Token (Required, role: admin) — berlaku untuk semua endpoint di file ini.
+**Auth:** Bearer Token (Required, role: ADMIN) — berlaku untuk semua endpoint di file ini.
 
 ---
 
-## 1. Get Daftar Transaksi
+## 1. List Transactions
 
 Mengambil riwayat semua transaksi.
 
@@ -18,61 +18,63 @@ Mengambil riwayat semua transaksi.
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
 | page | number | 1 | Nomor halaman |
-| per_page | number | 10 | Jumlah per halaman |
-| search | string | - | Pencarian berdasarkan invoice/nama user |
-| status | string | - | Filter: `Berhasil`, `Pending`, `Gagal` |
-| type | string | - | Filter: `course`, `agenda` |
+| per_page | number | 10 | Jumlah per halaman (max 50) |
+| q | string | - | Pencarian berdasarkan invoice_number atau nama user |
+| status | string | - | Filter: `PENDING`, `SUCCESS`, `FAILED`, `REFUNDED`, `EXPIRED` |
+| payment_method | string | - | Filter: `BANK_TRANSFER`, `E_WALLET`, `QRIS`, `VIRTUAL_ACCOUNT` |
+| type | string | - | Filter: `course`, `agenda` (derived dari course_id/agenda_id) |
 | date_from | string | - | Tanggal mulai (YYYY-MM-DD) |
 | date_to | string | - | Tanggal akhir (YYYY-MM-DD) |
-| sort | string | `newest` | Sorting: `newest`, `oldest`, `amount_asc`, `amount_desc` |
+| sort | string | `-created_at` | Sorting: `created_at`, `-created_at`, `amount`, `-amount` |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "data": {
-    "transactions": [
-      {
+  "data": [
+    {
+      "id": "uuid-string",
+      "invoice_number": "INV-CRS-2025-0042",
+      "user": {
         "id": "uuid-string",
-        "invoice": "INV-CRS-2025-0042",
-        "user": {
-          "id": "uuid-string",
-          "name": "Ahmad Fauzi",
-          "email": "ahmad@email.com"
-        },
-        "type": "course",
-        "item_title": "Manajemen Keuangan Masjid",
-        "amount": 250000,
-        "amount_display": "Rp 250.000",
-        "payment_method": "Bank Transfer (BSI)",
-        "status": "Berhasil",
-        "date": "2025-01-15T10:00:00Z",
-        "paid_at": "2025-01-15T10:15:00Z"
-      }
-    ],
-    "summary": {
-      "total_transactions": 150,
-      "total_revenue": 45000000,
-      "total_revenue_display": "Rp 45.000.000",
-      "pending_count": 5,
-      "pending_amount": 1250000
-    },
-    "pagination": {
-      "current_page": 1,
-      "per_page": 10,
-      "total": 150,
-      "total_pages": 15
+        "name": "Ahmad Fauzi",
+        "email": "ahmad@email.com"
+      },
+      "type": "course",
+      "item_title": "Manajemen Keuangan Masjid",
+      "amount": 250000,
+      "payment_method": "BANK_TRANSFER",
+      "status": "SUCCESS",
+      "paid_at": "2025-01-15T10:15:00Z",
+      "expired_at": "2025-01-16T10:00:00Z",
+      "created_at": "2025-01-15T10:00:00Z"
     }
+  ],
+  "meta": {
+    "total": 150,
+    "page": 1,
+    "per_page": 10,
+    "total_pages": 15
+  },
+  "links": {
+    "self": "/api/v1/admin/transactions?page=1&per_page=10",
+    "next": "/api/v1/admin/transactions?page=2&per_page=10",
+    "last": "/api/v1/admin/transactions?page=15&per_page=10"
+  },
+  "summary": {
+    "total_transactions": 150,
+    "total_revenue": 45000000,
+    "pending_count": 5,
+    "pending_amount": 1250000
   }
 }
 ```
 
-**Halaman terkait:** `/admin/transaksi` — [AdminTransaksi.tsx](../../src/pages/admin/AdminTransaksi.tsx)
+> **Catatan**: `type` di-derive dari data: jika `course_id` NOT NULL → `"course"`, jika `agenda_id` NOT NULL → `"agenda"`. `item_title` diambil dari JOIN ke `courses.title` atau `agendas.title`.
 
 ---
 
-## 2. Get Detail Transaksi
+## 2. Get Transaction Detail
 
 Mengambil detail satu transaksi.
 
@@ -88,10 +90,9 @@ Mengambil detail satu transaksi.
 
 ```json
 {
-  "success": true,
   "data": {
     "id": "uuid-string",
-    "invoice": "INV-CRS-2025-0042",
+    "invoice_number": "INV-CRS-2025-0042",
     "user": {
       "id": "uuid-string",
       "name": "Ahmad Fauzi",
@@ -103,22 +104,81 @@ Mengambil detail satu transaksi.
       "id": "uuid-string",
       "title": "Manajemen Keuangan Masjid"
     },
-    "original_amount": 250000,
-    "discount": 50000,
-    "total_amount": 200000,
-    "payment_method": "Bank Transfer",
-    "payment_channel": "Bank Syariah Indonesia",
-    "status": "Berhasil",
-    "created_at": "2025-01-15T10:00:00Z",
+    "amount": 250000,
+    "payment_method": "BANK_TRANSFER",
+    "payment_gateway_ref": "TRX-MIDTRANS-12345",
+    "status": "SUCCESS",
+    "notes": null,
     "paid_at": "2025-01-15T10:15:00Z",
-    "coupon_code": "MARBOT2025"
+    "expired_at": "2025-01-16T10:00:00Z",
+    "created_at": "2025-01-15T10:00:00Z",
+    "updated_at": "2025-01-15T10:15:00Z"
+  }
+}
+```
+
+### Response — 404 Not Found
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Transaksi tidak ditemukan"
   }
 }
 ```
 
 ---
 
-## 3. Export Transaksi
+## 3. Update Transaction Status
+
+Mengubah status transaksi secara manual (misalnya proses refund).
+
+**Endpoint:** `PATCH /api/v1/admin/transactions/:id/status`
+
+### Request Body
+
+```json
+{
+  "status": "REFUNDED",
+  "notes": "Refund atas permintaan peserta"
+}
+```
+
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| status | string | Ya | `REFUNDED` (hanya status ini yang bisa diubah manual oleh admin) |
+| notes | string | Tidak | Catatan alasan perubahan status |
+
+### Response — 200 OK
+
+```json
+{
+  "data": {
+    "id": "uuid-string",
+    "status": "REFUNDED",
+    "notes": "Refund atas permintaan peserta",
+    "updated_at": "2025-01-15T12:00:00Z"
+  }
+}
+```
+
+### Response — 422 Unprocessable Entity
+
+```json
+{
+  "error": {
+    "code": "invalid_transition",
+    "message": "Hanya transaksi berstatus SUCCESS yang dapat di-refund"
+  }
+}
+```
+
+> **Catatan**: Status `PENDING` → `SUCCESS`/`FAILED`/`EXPIRED` dikelola otomatis oleh webhook payment gateway dan cron job. Admin hanya bisa melakukan `SUCCESS` → `REFUNDED`.
+
+---
+
+## 4. Export Transactions
 
 Mengekspor data transaksi.
 
@@ -129,18 +189,20 @@ Mengekspor data transaksi.
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
 | format | string | `csv` | Format: `csv`, `xlsx` |
-| date_from | string | - | Tanggal mulai |
-| date_to | string | - | Tanggal akhir |
+| date_from | string | - | Tanggal mulai (YYYY-MM-DD) |
+| date_to | string | - | Tanggal akhir (YYYY-MM-DD) |
 | status | string | - | Filter status |
 
 ### Response — 200 OK
 
-**Content-Type:** `text/csv`
-**Content-Disposition:** `attachment; filename="transaksi-2025-01-01-2025-01-15.csv"`
+**Content-Type:** `text/csv` atau `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+**Content-Disposition:** `attachment; filename="transactions-2025-01-01-2025-01-15.csv"`
+
+> Binary file download.
 
 ---
 
-## 4. Get Laporan Pendapatan
+## 5. Revenue Report
 
 Mengambil data laporan pendapatan.
 
@@ -150,7 +212,7 @@ Mengambil data laporan pendapatan.
 
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
-| period | string | `monthly` | Period: `daily`, `weekly`, `monthly`, `yearly` |
+| period | string | `monthly` | Periode: `daily`, `weekly`, `monthly`, `yearly` |
 | date_from | string | - | Tanggal mulai (YYYY-MM-DD) |
 | date_to | string | - | Tanggal akhir (YYYY-MM-DD) |
 
@@ -158,15 +220,13 @@ Mengambil data laporan pendapatan.
 
 ```json
 {
-  "success": true,
   "data": {
     "total_revenue": 45000000,
-    "total_revenue_display": "Rp 45.000.000",
     "period": "monthly",
     "chart_data": [
-      { "label": "Jan 2025", "revenue": 5000000, "transactions": 20 },
-      { "label": "Feb 2025", "revenue": 7500000, "transactions": 30 },
-      { "label": "Mar 2025", "revenue": 6000000, "transactions": 25 }
+      { "label": "Jan 2025", "revenue": 5000000, "transactions_count": 20 },
+      { "label": "Feb 2025", "revenue": 7500000, "transactions_count": 30 },
+      { "label": "Mar 2025", "revenue": 6000000, "transactions_count": 25 }
     ],
     "revenue_by_type": {
       "course": { "amount": 35000000, "percentage": 77.8 },
@@ -177,18 +237,16 @@ Mengambil data laporan pendapatan.
         "id": "uuid-string",
         "title": "Manajemen Keuangan Masjid",
         "revenue": 12500000,
-        "students": 50
+        "students_count": 50
       }
     ]
   }
 }
 ```
 
-**Halaman terkait:** `/admin/laporan` — [AdminLaporan.tsx](../../src/pages/admin/AdminLaporan.tsx)
-
 ---
 
-## 5. Get Laporan Enrollment
+## 6. Enrollment Report
 
 Mengambil data laporan enrollment peserta.
 
@@ -198,15 +256,14 @@ Mengambil data laporan enrollment peserta.
 
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
-| period | string | `monthly` | Period: `daily`, `weekly`, `monthly`, `yearly` |
-| date_from | string | - | Tanggal mulai |
-| date_to | string | - | Tanggal akhir |
+| period | string | `monthly` | Periode: `daily`, `weekly`, `monthly`, `yearly` |
+| date_from | string | - | Tanggal mulai (YYYY-MM-DD) |
+| date_to | string | - | Tanggal akhir (YYYY-MM-DD) |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
   "data": {
     "total_enrollments": 5000,
     "new_enrollments_period": 300,
@@ -222,9 +279,9 @@ Mengambil data laporan enrollment peserta.
       { "category": "Manajemen", "count": 900, "percentage": 18 }
     ],
     "enrollments_by_level": [
-      { "level": "Pemula", "count": 2500, "percentage": 50 },
-      { "level": "Menengah", "count": 1800, "percentage": 36 },
-      { "level": "Lanjut", "count": 700, "percentage": 14 }
+      { "level": "BEGINNER", "count": 2500, "percentage": 50 },
+      { "level": "INTERMEDIATE", "count": 1800, "percentage": 36 },
+      { "level": "ADVANCED", "count": 700, "percentage": 14 }
     ]
   }
 }
@@ -232,7 +289,7 @@ Mengambil data laporan enrollment peserta.
 
 ---
 
-## 6. Get Laporan Performa Kursus
+## 7. Course Performance Report
 
 Mengambil data performa per kursus.
 
@@ -243,40 +300,45 @@ Mengambil data performa per kursus.
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
 | page | number | 1 | Nomor halaman |
-| per_page | number | 10 | Jumlah per halaman |
-| sort | string | `students` | Sorting: `students`, `rating`, `revenue`, `completion_rate` |
+| per_page | number | 10 | Jumlah per halaman (max 50) |
+| sort | string | `-students_count` | Sorting: `students_count`, `-students_count`, `rating`, `-rating`, `revenue`, `-revenue`, `completion_rate`, `-completion_rate` |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "data": {
-    "courses": [
-      {
+  "data": [
+    {
+      "id": "uuid-string",
+      "title": "Standar Operasional Kebersihan Masjid",
+      "instructor": {
         "id": "uuid-string",
-        "title": "Standar Operasional Kebersihan Masjid",
-        "instructor": "Ustadz Ahmad Fauzi",
-        "students_count": 1200,
-        "completion_rate": 72.5,
-        "average_rating": 4.8,
-        "revenue": 0,
-        "revenue_display": "Gratis"
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "per_page": 10,
-      "total": 24,
-      "total_pages": 3
+        "name": "Ustadz Ahmad Fauzi"
+      },
+      "students_count": 1200,
+      "completion_rate": 72.5,
+      "rating": 4.8,
+      "revenue": 0,
+      "pricing": "FREE"
     }
+  ],
+  "meta": {
+    "total": 24,
+    "page": 1,
+    "per_page": 10,
+    "total_pages": 3
+  },
+  "links": {
+    "self": "/api/v1/admin/reports/courses?page=1&per_page=10",
+    "next": "/api/v1/admin/reports/courses?page=2&per_page=10",
+    "last": "/api/v1/admin/reports/courses?page=3&per_page=10"
   }
 }
 ```
 
 ---
 
-## 7. Export Laporan
+## 8. Export Report
 
 Mengekspor laporan ke PDF atau spreadsheet.
 
@@ -286,11 +348,40 @@ Mengekspor laporan ke PDF atau spreadsheet.
 
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
-| type | string | Ya | `revenue`, `enrollments`, `courses` |
+| type | string | - | Required. `revenue`, `enrollments`, `courses` |
 | format | string | `pdf` | Format: `pdf`, `csv`, `xlsx` |
-| date_from | string | - | Tanggal mulai |
-| date_to | string | - | Tanggal akhir |
+| date_from | string | - | Tanggal mulai (YYYY-MM-DD) |
+| date_to | string | - | Tanggal akhir (YYYY-MM-DD) |
 
 ### Response — 200 OK
 
-Binary file download sesuai format yang diminta.
+**Content-Type:** Sesuai format yang diminta.
+**Content-Disposition:** `attachment; filename="report-revenue-2025-01.pdf"`
+
+> Binary file download.
+
+---
+
+## Error Responses (Global)
+
+### 401 Unauthorized
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Token tidak valid atau sudah kadaluarsa"
+  }
+}
+```
+
+### 403 Forbidden
+
+```json
+{
+  "error": {
+    "code": "forbidden",
+    "message": "Anda tidak memiliki akses untuk resource ini"
+  }
+}
+```

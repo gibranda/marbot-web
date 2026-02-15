@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CheckCircle, Users, Layout, Award, ChevronDown, ChevronUp, Sparkles, Target, Heart, Star, ChevronRight, BookOpen, MessageCircle, HelpCircle, ArrowUpRight } from 'lucide-react';
+// Added BookOpen to the lucide-react imports
+import { CheckCircle, Users, Layout, Award, ChevronDown, Sparkles, Target, Heart, Star, ChevronRight, MessageCircle, HelpCircle, ArrowUpRight, MessageSquare, BookOpen } from 'lucide-react';
 import CourseCard from '../components/CourseCard';
-import { MOCK_COURSES, MOCK_INSTRUCTORS, FAQS } from '../constants';
+import { MOCK_COURSES, MOCK_INSTRUCTORS, FAQS, MOCK_FORUM_THREADS } from '../constants';
 
 const Home: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -98,7 +100,7 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Visual Mockup - Hidden on smaller mobile, visible from lg */}
+            {/* Visual Mockup */}
             <div className="relative group hidden lg:block">
               <div className="absolute inset-0 bg-gradient-to-tr from-[#14B8A6] to-[#99F6E4] rounded-2xl rotate-3 scale-105 opacity-20 blur-2xl group-hover:rotate-6 transition-transform"></div>
               <div className="relative bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl overflow-hidden">
@@ -189,7 +191,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Courses Section - Implement Horizontal Scroll */}
+      {/* Featured Courses Section */}
       <section id="kursus-populer" className="reveal-section pt-16 pb-10 md:pt-24 md:pb-16 bg-white" ref={addToRevealRefs}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-12">
@@ -202,7 +204,6 @@ const Home: React.FC = () => {
             </Link>
           </div>
 
-          {/* Horizontal Scroll Area Implementation */}
           <div className="flex overflow-x-auto gap-6 md:gap-8 pb-10 scrollbar-hide -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 snap-x snap-mandatory">
             {MOCK_COURSES.slice(0, 5).map((course, idx) => (
               <div 
@@ -222,13 +223,11 @@ const Home: React.FC = () => {
         <div className="h-px bg-[#E2E8F0] w-full stagger-item"></div>
       </div>
 
-      {/* Redesigned Pengajar Section: "Our Team" Style */}
+      {/* Pengajar Section */}
       <section id="pengajar-preview" className="reveal-section pt-10 pb-16 md:pt-16 md:pb-24 bg-white" ref={addToRevealRefs}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Large Panel Container */}
           <div className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl p-6 md:p-12 lg:p-16">
             
-            {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-8">
               <div className="max-w-xl">
                 <h2 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-[#0F172A] mb-4 md:mb-6 leading-tight">
@@ -245,18 +244,15 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Team Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
               {MOCK_INSTRUCTORS.slice(0, 4).map((instructor, idx) => (
                 <div key={instructor.id} className="stagger-item group flex flex-col" style={{ transitionDelay: `${idx * 150}ms` }}>
-                  {/* Portrait Photo Container */}
                   <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F8FAFC] mb-8 shadow-sm group-hover:shadow-md transition-all">
                     <img 
                       src={instructor.avatar} 
                       alt={instructor.name} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                     />
-                    {/* Floating Level Badge */}
                     <div className="absolute top-4 left-4">
                       <div className="px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-lg text-[9px] font-bold text-[#14B8A6] uppercase tracking-widest shadow-sm border border-white">
                         {instructor.role.split(' ')[0]}
@@ -264,7 +260,6 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Info Area */}
                   <div className="flex flex-col flex-grow text-center sm:text-left">
                     <h3 className="text-lg md:text-xl font-extrabold text-[#0F172A] mb-1 group-hover:text-[#14B8A6] transition-colors">
                       {instructor.name}
@@ -276,24 +271,23 @@ const Home: React.FC = () => {
                       {instructor.bio}
                     </p>
 
-                    {/* Meta Info Bar */}
                     <div className="grid grid-cols-3 gap-2 py-4 border-y border-[#F1F5F9] mb-6">
                       <div className="flex flex-col items-center">
-                        <div className="flex items-center space-x-1 mb-1">
+                        <div className="flex items-center justify-center space-x-1 mb-1">
                           <Star size={12} className="text-yellow-400 fill-yellow-400" />
                           <span className="text-xs font-bold text-[#0F172A]">{instructor.rating}</span>
                         </div>
                         <span className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Rating</span>
                       </div>
                       <div className="flex flex-col items-center border-x border-[#F1F5F9]">
-                        <div className="flex items-center space-x-1 mb-1">
+                        <div className="flex items-center justify-center space-x-1 mb-1">
                           <Users size={12} className="text-[#14B8A6]" />
                           <span className="text-xs font-bold text-[#0F172A]">{instructor.totalStudents.toLocaleString()}</span>
                         </div>
                         <span className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Peserta</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="flex items-center space-x-1 mb-1">
+                        <div className="flex items-center justify-center space-x-1 mb-1">
                           <BookOpen size={12} className="text-[#64748B]" />
                           <span className="text-xs font-bold text-[#0F172A]">{instructor.totalCourses}</span>
                         </div>
@@ -301,7 +295,6 @@ const Home: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Profile Link Button */}
                     <Link 
                       to={`/pengajar/${instructor.id}`} 
                       className="mt-auto inline-flex items-center justify-center w-full py-3 border-2 border-[#E2E8F0] text-[#475569] font-bold text-xs rounded-[10px] hover:border-[#14B8A6] hover:text-[#14B8A6] hover:bg-[#F0FDFA] transition-all group-hover:shadow-lg group-hover:shadow-[#14B8A6]/5 tap-target"
@@ -313,7 +306,6 @@ const Home: React.FC = () => {
               ))}
             </div>
 
-            {/* Mobile-only See All Button */}
             <div className="mt-12 md:hidden">
               <Link to="/pengajar" className="flex items-center justify-center w-full py-4 border-2 border-[#E2E8F0] text-[#0F172A] font-bold rounded-xl bg-white shadow-sm tap-target">
                 Lihat Semua Pengajar <ChevronRight size={18} className="ml-2" />
@@ -324,9 +316,63 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Catalog Teaser Section - FULL-BLEED */}
+      {/* Forum Highlight Section */}
+      <section id="forum-highlight" className="reveal-section scroll-mt-20 py-16 md:py-24 bg-white" ref={addToRevealRefs}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+             <div className="stagger-item">
+               <div className="inline-flex items-center space-x-2 px-4 py-2 bg-[#F0FDFA] border border-[#CCFBF1] rounded-full mb-6">
+                 <MessageSquare size={16} className="text-[#14B8A6]" />
+                 <span className="text-[10px] md:text-xs font-bold text-[#0F766E] uppercase tracking-wider">SOUL of the Hub</span>
+               </div>
+               <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#0F172A] mb-6 leading-tight">
+                 Forum Takmir & Marbot
+               </h2>
+               <h3 className="text-xl md:text-2xl font-bold text-[#14B8A6] mb-6">
+                 Belajar dari Pengalaman Nyata Antar Masjid
+               </h3>
+               <p className="text-sm md:text-lg text-[#64748B] mb-10 max-w-xl leading-relaxed">
+                 Forum Takmir & Marbot adalah ruang diskusi bagi pengurus masjid untuk saling berbagi praktik baik, bertanya solusi operasional, dan mendiskusikan tantangan nyata kemasjidan.
+               </p>
+               <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                 <Link to="/forum" className="w-full sm:w-auto px-8 py-4 bg-[#14B8A6] text-white font-bold rounded-xl hover:bg-[#0F766E] shadow-lg shadow-[#14B8A6]/20 transition-all text-center tap-target flex items-center justify-center">
+                   Masuk ke Forum
+                 </Link>
+                 <Link to="/forum" className="w-full sm:w-auto px-8 py-4 border-2 border-[#E2E8F0] text-[#0F172A] font-bold rounded-xl hover:border-[#14B8A6] hover:text-[#14B8A6] transition-all text-center tap-target flex items-center justify-center">
+                   Lihat Diskusi Terbaru
+                 </Link>
+               </div>
+             </div>
+
+             <div className="stagger-item grid grid-cols-1 gap-4">
+               {MOCK_FORUM_THREADS.slice(0, 3).map((thread) => (
+                 <Link key={thread.id} to={`/forum/${thread.slug}`} className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-sm hover:border-[#14B8A6] hover:shadow-md transition-all group">
+                   <div className="flex items-center justify-between mb-3">
+                     <span className="px-2.5 py-1 bg-[#F0FDFA] text-[#14B8A6] text-[9px] font-bold uppercase rounded-lg border border-[#14B8A6]/10">{thread.category}</span>
+                     <span className="text-[10px] text-[#94A3B8] font-medium">{thread.timestamp}</span>
+                   </div>
+                   <h4 className="text-sm sm:text-base font-bold text-[#0F172A] group-hover:text-[#14B8A6] transition-colors mb-3 line-clamp-1">{thread.title}</h4>
+                   <div className="flex items-center justify-between">
+                     <div className="flex items-center space-x-2">
+                       <div className="w-6 h-6 rounded-lg bg-[#F8FAFC] flex items-center justify-center text-[10px] font-bold text-[#64748B] border border-[#E2E8F0]">
+                         {thread.author.charAt(0)}
+                       </div>
+                       <span className="text-xs text-[#64748B] font-medium">{thread.authorMosque}</span>
+                     </div>
+                     <div className="flex items-center space-x-1 text-[#94A3B8]">
+                        <MessageSquare size={12} />
+                        <span className="text-[10px] font-bold">{thread.commentCount}</span>
+                     </div>
+                   </div>
+                 </Link>
+               ))}
+             </div>
+           </div>
+        </div>
+      </section>
+
+      {/* Catalog Teaser Section */}
       <section id="teaser-katalog" className="reveal-section relative mb-16 md:mb-24 py-12 md:py-20 lg:py-24 text-white overflow-hidden bg-[#0F766E]" ref={addToRevealRefs}>
-        {/* Decorative background element - smaller on mobile */}
         <div className="absolute top-0 right-0 p-8 md:p-24 opacity-10 pointer-events-none">
           <Layout size={120} strokeWidth={0.5} className="text-white md:w-[240px] md:h-[240px] lg:w-[300px] lg:h-[300px]" />
         </div>
@@ -372,11 +418,9 @@ const Home: React.FC = () => {
       {/* FAQ Section */}
       <section id="faq" className="reveal-section scroll-mt-20 py-16 md:py-24 bg-[#F8FAFC]" ref={addToRevealRefs}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Main FAQ Panel */}
           <div className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl p-6 md:p-12 lg:p-16">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
               
-              {/* Column 1 & 2: FAQ List */}
               <div className="lg:col-span-2 space-y-8">
                 <div className="text-center lg:text-left">
                   <div className="inline-flex items-center px-3 py-1 bg-[#F0FDFA] border border-[#CCFBF1] rounded-full mb-4">
@@ -430,7 +474,6 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              {/* Column 3: Help Card */}
               <div className="lg:col-span-1">
                 <div className="sticky top-32 space-y-6">
                   <div className="bg-[#0F766E] rounded-xl p-8 text-white relative overflow-hidden shadow-xl">
@@ -468,7 +511,7 @@ const Home: React.FC = () => {
                       </div>
                       <div className="flex items-center space-x-3 p-3 bg-white rounded-[10px] border border-[#E2E8F0] shadow-sm">
                         <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
-                          <BookOpen size={16} />
+                          <Layout size={16} />
                         </div>
                         <div className="text-xs truncate">
                           <div className="font-bold">Email Support</div>

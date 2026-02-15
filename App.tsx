@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -14,11 +15,18 @@ import Checkout from './pages/Checkout';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import CoursePlayer from './pages/CoursePlayer';
 
+// Forum Pages
+import ForumHome from './pages/Forum/ForumHome';
+import ForumThreadDetail from './pages/Forum/ForumThreadDetail';
+
 // Agenda Pages
 import AgendaList from './pages/agenda/AgendaList';
 import AgendaDetail from './pages/agenda/AgendaDetail';
 import AgendaCheckout from './pages/agenda/AgendaCheckout';
 import AgendaSuccess from './pages/agenda/AgendaSuccess';
+
+// Search Page
+import SearchResults from './pages/SearchResults';
 
 // Admin Pages
 import AdminLayout from './components/AdminLayout';
@@ -186,6 +194,9 @@ const App: React.FC = () => {
                     <Route path="/course/:id" element={<CourseDetail />} />
                     <Route path="/pengajar" element={<Instructors />} />
                     <Route path="/pengajar/:id" element={<InstructorProfile />} />
+                    <Route path="/forum" element={<ForumHome />} />
+                    <Route path="/forum/:slug" element={<ForumThreadDetail />} />
+                    <Route path="/search" element={<SearchResults />} />
                     <Route path="*" element={<Home />} />
                   </Routes>
                 </main>

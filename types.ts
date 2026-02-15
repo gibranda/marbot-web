@@ -56,6 +56,35 @@ export interface Agenda {
   registrantsCount: number;
 }
 
+export interface ForumCategory {
+  id: string;
+  name: string;
+  icon: string;
+  count: number;
+}
+
+export interface ForumComment {
+  id: string;
+  author: string;
+  role: string;
+  content: string;
+  timestamp: string;
+}
+
+export interface ForumThread {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  author: string;
+  authorMosque: string;
+  content: string;
+  commentCount: number;
+  timestamp: string;
+  status: 'Terjawab' | 'Diskusi';
+  comments?: ForumComment[];
+}
+
 export interface FAQItem {
   question: string;
   answer: string;

@@ -255,125 +255,20 @@
 
 ## 6. Data Model
 
-### 6.1 User
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| name | string | Nama lengkap |
-| email | string | Email unik |
-| phone | string | Nomor telepon |
-| password | string | Hash password |
-| role | enum | `admin` \| `student` |
-| avatar | string | URL foto profil |
-| status | enum | `active` \| `inactive` |
-| created_at | datetime | Tanggal registrasi |
-| updated_at | datetime | Terakhir diupdate |
+Dokumentasi lengkap struktur database telah dipisahkan ke file tersendiri:
 
-### 6.2 Course
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| title | string | Judul kursus |
-| description | text | Deskripsi lengkap |
-| category | string | Kategori kursus |
-| level | enum | `Pemula` \| `Menengah` \| `Lanjut` |
-| price | number | Harga (0 = gratis) |
-| thumbnail | string | URL gambar thumbnail |
-| instructor_id | string (FK) | Relasi ke Instructor |
-| duration | string | Total durasi kursus |
-| modules_count | number | Jumlah modul |
-| rating | number | Rata-rata rating |
-| students_count | number | Jumlah peserta |
-| status | enum | `Published` \| `Draft` |
-| last_update | datetime | Terakhir diupdate |
-| created_at | datetime | Tanggal dibuat |
+**[Database Schema Design](database-schema.md)**
 
-### 6.3 Module
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| course_id | string (FK) | Relasi ke Course |
-| title | string | Judul modul |
-| content | text | Konten/materi modul |
-| order | number | Urutan modul |
-| duration | string | Durasi modul |
-| type | enum | `video` \| `text` \| `quiz` |
-
-### 6.4 Instructor
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| name | string | Nama lengkap |
-| role | string | Jabatan/spesialisasi |
-| bio | text | Biografi |
-| avatar | string | URL foto |
-| rating | number | Rata-rata rating |
-| total_courses | number | Jumlah kursus |
-| total_students | number | Total peserta |
-| location | string | Lokasi |
-
-### 6.5 Enrollment
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| user_id | string (FK) | Relasi ke User |
-| course_id | string (FK) | Relasi ke Course |
-| progress | number | Persentase progress (0-100) |
-| status | enum | `active` \| `completed` |
-| enrolled_at | datetime | Tanggal enroll |
-| completed_at | datetime | Tanggal selesai |
-
-### 6.6 Transaction
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| invoice | string | Nomor invoice unik |
-| user_id | string (FK) | Relasi ke User |
-| course_id | string (FK) | Relasi ke Course (nullable) |
-| agenda_id | string (FK) | Relasi ke Agenda (nullable) |
-| amount | number | Jumlah pembayaran |
-| method | string | Metode pembayaran |
-| status | enum | `Berhasil` \| `Pending` \| `Gagal` |
-| date | datetime | Tanggal transaksi |
-
-### 6.7 Certificate
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| user_id | string (FK) | Relasi ke User |
-| course_id | string (FK) | Relasi ke Course |
-| cert_number | string | Nomor sertifikat unik |
-| issue_date | datetime | Tanggal terbit |
-
-### 6.8 Agenda
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| slug | string | URL slug unik |
-| title | string | Judul agenda |
-| type | enum | `Online` \| `Offline` |
-| date | date | Tanggal pelaksanaan |
-| time | string | Waktu mulai |
-| end_time | string | Waktu selesai |
-| location | string | Alamat lokasi |
-| location_name | string | Nama tempat |
-| price | number | Harga (0 = gratis) |
-| quota | number | Kuota peserta |
-| remaining_quota | number | Sisa kuota |
-| description | text | Deskripsi agenda |
-| narasumber | string | Nama narasumber |
-| cover | string | URL gambar cover |
-| status | enum | `Published` \| `Draft` |
-| registrants_count | number | Jumlah pendaftar |
-
-### 6.9 AgendaRegistration
-| Field | Type | Keterangan |
-|-------|------|------------|
-| id | string (UUID) | Primary key |
-| user_id | string (FK) | Relasi ke User |
-| agenda_id | string (FK) | Relasi ke Agenda |
-| status | enum | `confirmed` \| `pending` \| `cancelled` |
-| registered_at | datetime | Tanggal pendaftaran |
+Mencakup:
+- 18 tabel dengan hierarki kursus: `courses` → `course_sections` → `lessons`
+- 16 enum definitions (English, UPPER_SNAKE_CASE) dengan penjelasan detail kapan digunakan dan cara pengisian
+- Struktur kurikulum: Section (Pendahuluan/Utama/Tambahan) → Lessons (Video/Text/Quiz)
+- Video storage via YouTube private/unlisted link
+- Harga kursus: FREE/PAID dengan dukungan diskon (original_price + price)
+- Info tambahan kursus: learning points, has_certificate, has_lifetime_access, language
+- Materi pendukung (PDF, slide, dokumen) per kursus atau per lesson
+- Forum diskusi, review & rating, sertifikat
+- Entity Relationship Diagram (Mermaid) + Data Hierarchy visualization
 
 ---
 

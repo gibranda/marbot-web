@@ -3,13 +3,13 @@
 > Endpoint untuk mengelola dan memonitor data peserta/student.
 
 **Base URL:** `/api/v1/admin`
-**Auth:** Bearer Token (Required, role: admin) — berlaku untuk semua endpoint di file ini.
+**Auth:** Bearer Token (Required, role: ADMIN) — berlaku untuk semua endpoint di file ini.
 
 ---
 
-## 1. Get Daftar Peserta
+## 1. List Students
 
-Mengambil daftar semua peserta.
+Mengambil daftar semua peserta (users dengan role STUDENT).
 
 **Endpoint:** `GET /api/v1/admin/students`
 
@@ -18,48 +18,50 @@ Mengambil daftar semua peserta.
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
 | page | number | 1 | Nomor halaman |
-| per_page | number | 10 | Jumlah per halaman |
-| search | string | - | Pencarian berdasarkan nama/email |
-| status | string | - | Filter: `Aktif`, `Nonaktif` |
-| sort | string | `newest` | Sorting: `newest`, `name_asc`, `name_desc`, `courses`, `progress` |
+| per_page | number | 10 | Jumlah per halaman (max 50) |
+| q | string | - | Pencarian berdasarkan nama atau email |
+| status | string | - | Filter: `ACTIVE`, `INACTIVE`, `SUSPENDED` |
+| sort | string | `-created_at` | Sorting: `name`, `-name`, `created_at`, `-created_at`, `-courses_count`, `-last_login_at` |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "data": {
-    "students": [
-      {
-        "id": "uuid-string",
-        "name": "Ahmad Fauzi",
-        "email": "ahmad@email.com",
-        "phone": "081234567890",
-        "avatar": "https://storage.example.com/avatars/user-1.jpg",
-        "courses_joined": 3,
-        "progress": 65,
-        "status": "Aktif",
-        "join_date": "2025-01-01T00:00:00Z",
-        "last_active": "2025-01-14T08:30:00Z"
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "per_page": 10,
-      "total": 50,
-      "total_pages": 5
+  "data": [
+    {
+      "id": "uuid-string",
+      "name": "Ahmad Fauzi",
+      "email": "ahmad@email.com",
+      "phone": "081234567890",
+      "avatar_url": "https://storage.example.com/avatars/user-1.jpg",
+      "status": "ACTIVE",
+      "email_verified_at": "2025-01-01T08:00:00Z",
+      "courses_count": 3,
+      "last_login_at": "2025-01-14T08:30:00Z",
+      "created_at": "2025-01-01T00:00:00Z"
     }
+  ],
+  "meta": {
+    "total": 5000,
+    "page": 1,
+    "per_page": 10,
+    "total_pages": 500
+  },
+  "links": {
+    "self": "/api/v1/admin/students?page=1&per_page=10",
+    "next": "/api/v1/admin/students?page=2&per_page=10",
+    "last": "/api/v1/admin/students?page=500&per_page=10"
   }
 }
 ```
 
-**Halaman terkait:** `/admin/peserta` — [AdminPeserta.tsx](../../src/pages/admin/AdminPeserta.tsx)
+> **Computed fields**: `courses_count` dihitung via `COUNT(enrollments) WHERE user_id = ? AND status != 'DROPPED'`.
 
 ---
 
-## 2. Get Detail Peserta
+## 2. Get Student Detail
 
-Mengambil detail satu peserta beserta riwayat enrollment.
+Mengambil detail satu peserta beserta statistik, riwayat enrollment, dan transaksi.
 
 **Endpoint:** `GET /api/v1/admin/students/:id`
 
@@ -67,31 +69,29 @@ Mengambil detail satu peserta beserta riwayat enrollment.
 
 | Parameter | Type | Keterangan |
 |-----------|------|------------|
-| id | string | Student UUID |
+| id | string | User UUID |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
   "data": {
     "id": "uuid-string",
     "name": "Ahmad Fauzi",
     "email": "ahmad@email.com",
     "phone": "081234567890",
-    "avatar": "https://storage.example.com/avatars/user-1.jpg",
-    "institution": "Masjid Al-Ikhlas",
-    "location": "Jakarta Selatan",
-    "status": "Aktif",
-    "join_date": "2025-01-01T00:00:00Z",
-    "last_active": "2025-01-14T08:30:00Z",
+    "avatar_url": "https://storage.example.com/avatars/user-1.jpg",
+    "status": "ACTIVE",
+    "email_verified_at": "2025-01-01T08:00:00Z",
+    "phone_verified_at": null,
+    "last_login_at": "2025-01-14T08:30:00Z",
+    "created_at": "2025-01-01T00:00:00Z",
     "stats": {
-      "courses_joined": 3,
+      "courses_enrolled": 3,
       "courses_completed": 1,
       "certificates_earned": 1,
-      "agenda_registered": 2,
-      "total_spent": 350000,
-      "total_spent_display": "Rp 350.000"
+      "agendas_registered": 2,
+      "total_spent": 350000
     },
     "enrollments": [
       {
@@ -100,8 +100,8 @@ Mengambil detail satu peserta beserta riwayat enrollment.
           "id": "uuid-string",
           "title": "Standar Operasional Kebersihan Masjid"
         },
-        "progress": 100,
-        "status": "completed",
+        "progress": 100.00,
+        "status": "COMPLETED",
         "enrolled_at": "2025-01-02T00:00:00Z",
         "completed_at": "2025-01-10T00:00:00Z"
       },
@@ -111,20 +111,86 @@ Mengambil detail satu peserta beserta riwayat enrollment.
           "id": "uuid-string",
           "title": "Manajemen Keuangan Masjid"
         },
-        "progress": 45,
-        "status": "active",
+        "progress": 45.00,
+        "status": "ACTIVE",
         "enrolled_at": "2025-01-08T00:00:00Z",
         "completed_at": null
       }
     ],
-    "transactions": [
+    "recent_transactions": [
       {
         "id": "uuid-string",
-        "invoice": "INV-CRS-2025-0042",
-        "item_title": "Manajemen Keuangan Masjid",
+        "invoice_number": "INV-CRS-2025-0042",
         "amount": 250000,
-        "status": "Berhasil",
-        "date": "2025-01-08T00:00:00Z"
+        "status": "SUCCESS",
+        "created_at": "2025-01-08T00:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+### Response — 404 Not Found
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Peserta tidak ditemukan"
+  }
+}
+```
+
+---
+
+## 3. Update Student Status
+
+Mengubah status peserta (aktif/nonaktif/suspended).
+
+**Endpoint:** `PATCH /api/v1/admin/students/:id/status`
+
+### Path Parameters
+
+| Parameter | Type | Keterangan |
+|-----------|------|------------|
+| id | string | User UUID |
+
+### Request Body
+
+```json
+{
+  "status": "SUSPENDED"
+}
+```
+
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| status | string | Ya | `ACTIVE`, `INACTIVE`, `SUSPENDED` |
+
+### Response — 200 OK
+
+```json
+{
+  "data": {
+    "id": "uuid-string",
+    "status": "SUSPENDED",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
+}
+```
+
+### Response — 422 Unprocessable Entity
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Validasi gagal",
+    "details": [
+      {
+        "field": "status",
+        "message": "Status tidak valid",
+        "code": "invalid_enum"
       }
     ]
   }
@@ -133,44 +199,7 @@ Mengambil detail satu peserta beserta riwayat enrollment.
 
 ---
 
-## 3. Update Status Peserta
-
-Mengubah status peserta (aktif/nonaktif).
-
-**Endpoint:** `PATCH /api/v1/admin/students/:id/status`
-
-### Path Parameters
-
-| Parameter | Type | Keterangan |
-|-----------|------|------------|
-| id | string | Student UUID |
-
-### Request Body
-
-```json
-{
-  "status": "Nonaktif",
-  "reason": "Akun melanggar ketentuan"
-}
-```
-
-| Field | Type | Required | Validasi |
-|-------|------|----------|----------|
-| status | string | Ya | `Aktif`, `Nonaktif` |
-| reason | string | Tidak | Alasan perubahan status |
-
-### Response — 200 OK
-
-```json
-{
-  "success": true,
-  "message": "Status peserta berhasil diubah menjadi Nonaktif"
-}
-```
-
----
-
-## 4. Export Daftar Peserta
+## 4. Export Students
 
 Mengekspor daftar peserta ke file CSV/Excel.
 
@@ -181,11 +210,37 @@ Mengekspor daftar peserta ke file CSV/Excel.
 | Parameter | Type | Default | Keterangan |
 |-----------|------|---------|------------|
 | format | string | `csv` | Format: `csv`, `xlsx` |
-| status | string | - | Filter status |
+| status | string | - | Filter status: `ACTIVE`, `INACTIVE`, `SUSPENDED` |
 
 ### Response — 200 OK
 
 **Content-Type:** `text/csv` atau `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
-**Content-Disposition:** `attachment; filename="peserta-2025-01-15.csv"`
+**Content-Disposition:** `attachment; filename="students-2025-01-15.csv"`
 
-> Binary file download
+> Binary file download.
+
+---
+
+## Error Responses (Global)
+
+### 401 Unauthorized
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Token tidak valid atau sudah kadaluarsa"
+  }
+}
+```
+
+### 403 Forbidden
+
+```json
+{
+  "error": {
+    "code": "forbidden",
+    "message": "Anda tidak memiliki akses untuk resource ini"
+  }
+}
+```

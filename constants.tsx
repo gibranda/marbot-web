@@ -1,5 +1,5 @@
 
-import { Course, Instructor, FAQItem, Transaction, Student, Certificate, Activity, Agenda } from './types';
+import { Course, Instructor, FAQItem, Transaction, Student, Certificate, Activity, Agenda, ForumCategory, ForumThread } from './types';
 
 export const LOGO_URL = "https://image2url.com/r2/default/images/1770479630100-8df01458-b375-4198-ae0e-4b1762b1ada7.png";
 
@@ -63,7 +63,7 @@ export const MOCK_INSTRUCTORS: Instructor[] = [
     id: '2',
     name: 'H. Bambang S.',
     role: 'Takmir & Manajemen',
-    bio: 'Spesialis operasional masjid dan pemberdayaan ekonomi jamaah.',
+    bio: 'Spesialis operasional masjid and pemberdayaan ekonomi jamaah.',
     avatar: 'https://picsum.photos/seed/i2/200/200',
     rating: 4.8,
     totalCourses: 8,
@@ -168,6 +168,82 @@ export const MOCK_COURSES: Course[] = [
     description: 'Cara mendata and merawat barang wakaf agar tidak cepat rusak atau hilang.',
     lastUpdate: 'April 2024',
     status: 'Published'
+  }
+];
+
+export const FORUM_CATEGORIES: ForumCategory[] = [
+  { id: '1', name: 'Operasional Masjid', icon: 'Settings', count: 156 },
+  { id: '2', name: 'Program Jamaah', icon: 'Users', count: 89 },
+  { id: '3', name: 'Keuangan & Transparansi', icon: 'CreditCard', count: 42 },
+  { id: '4', name: 'Fasilitas & Renovasi', icon: 'Home', count: 67 },
+  { id: '5', name: 'Ramadhan & Event Besar', icon: 'Calendar', count: 112 },
+  { id: '6', name: 'Ide Program Masjid', icon: 'Sparkles', count: 74 },
+];
+
+export const MOCK_FORUM_THREADS: ForumThread[] = [
+  {
+    id: 't1',
+    slug: 'cara-mengatasi-jamaah-shubuh-sepi',
+    title: 'Cara mengatasi jamaah shubuh sepi?',
+    category: 'Program Jamaah',
+    author: 'Ust. Zainal',
+    authorMosque: 'Takmir Masjid Al-Ikhlas',
+    content: 'Assalamu\'alaikum warahmatullah. Mohon arahan dari rekan-rekan takmir. Bagaimana strategi menghidupkan jamaah shubuh di lingkungan yang warganya mayoritas pekerja kantoran?',
+    commentCount: 24,
+    timestamp: '2 jam lalu',
+    status: 'Diskusi',
+    comments: [
+      { id: 'c1', author: 'H. Ahmad', role: 'Takmir', content: 'Di masjid kami, kami adakan program "Sarapan Berjamaah" setiap hari Ahad Shubuh, ini cukup membantu menarik minat jamaah baru.', timestamp: '1 jam lalu' },
+      { id: 'c2', author: 'Mas Wahyu', role: 'Marbot', content: 'Pastikan fasilitas wudhu air hangat tersedia jika udara dingin, sangat membantu jamaah lansia.', timestamp: '30 menit lalu' }
+    ]
+  },
+  {
+    id: 't2',
+    slug: 'standar-kebersihan-masjid-harian',
+    title: 'Standar kebersihan masjid harian',
+    category: 'Operasional Masjid',
+    author: 'Mas Wahid',
+    authorMosque: 'Marbot Masjid Ar-Rahman',
+    content: 'Apa saja checklist harian yang wajib dilakukan oleh marbot agar kebersihan masjid tetap terjaga 24 jam?',
+    commentCount: 15,
+    timestamp: '5 jam lalu',
+    status: 'Terjawab'
+  },
+  {
+    id: 't3',
+    slug: 'laporan-keuangan-masjid-transparan',
+    title: 'Laporan keuangan masjid transparan ke jamaah',
+    category: 'Keuangan & Transparansi',
+    author: 'Bpk. Ridwan',
+    authorMosque: 'Bendahara Masjid Jami',
+    content: 'Sharing dong sistem pelaporan keuangan yang simpel tapi transparan menggunakan Excel atau tools gratis.',
+    commentCount: 8,
+    timestamp: '1 hari lalu',
+    status: 'Diskusi'
+  },
+  {
+    id: 't4',
+    slug: 'manajemen-air-listrik-masjid-besar',
+    title: 'Manajemen air & listrik masjid besar',
+    category: 'Fasilitas & Renovasi',
+    author: 'Ir. Hasan',
+    authorMosque: 'Divisi Fasilitas',
+    content: 'Ada yang punya pengalaman menggunakan panel surya untuk masjid? Bagaimana kalkulasi efisiensi biayanya?',
+    commentCount: 12,
+    timestamp: '2 hari lalu',
+    status: 'Diskusi'
+  },
+  {
+    id: 't5',
+    slug: 'program-ramadhan-efektif',
+    title: 'Program Ramadhan yang efektif meningkatkan jamaah',
+    category: 'Ramadhan & Event Besar',
+    author: 'Ustadz Ali',
+    authorMosque: 'Ketua Panitia Ramadhan',
+    content: 'Izin bertanya ide-ide program untuk anak muda selama Ramadhan selain buka puasa bersama.',
+    commentCount: 31,
+    timestamp: '3 hari lalu',
+    status: 'Terjawab'
   }
 ];
 
