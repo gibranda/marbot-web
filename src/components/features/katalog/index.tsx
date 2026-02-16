@@ -13,6 +13,7 @@ import {
   BookOpen,
   ChevronRight,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 
@@ -86,7 +87,7 @@ const Catalog: React.FC = () => {
                         className="hidden"
                       />
                       <span
-                        className={`mr-3 flex h-5 w-5 items-center justify-center rounded-[6px] border-2 transition-all ${
+                        className={`mr-3 flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all ${
                           selectedCategory === cat
                             ? "border-[#14B8A6] bg-[#14B8A6]"
                             : "border-[#E2E8F0] group-hover:border-[#14B8A6]"
@@ -109,7 +110,7 @@ const Catalog: React.FC = () => {
                 <div className="space-y-3">
                   {["Pemula", "Menengah", "Lanjut"].map((level) => (
                     <label key={level} className="group tap-target flex cursor-pointer items-center space-x-3">
-                      <div className="h-5 w-5 rounded-[6px] border-2 border-[#E2E8F0] transition-all group-hover:border-[#14B8A6]"></div>
+                      <div className="h-5 w-5 rounded-md border-2 border-[#E2E8F0] transition-all group-hover:border-[#14B8A6]"></div>
                       <span className="text-sm font-medium text-[#64748B] group-hover:text-[#0F172A]">{level}</span>
                     </label>
                   ))}
@@ -193,11 +194,13 @@ const Catalog: React.FC = () => {
                     key={course.id}
                     className="group flex flex-col gap-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 transition-all hover:border-[#14B8A6] hover:shadow-md sm:p-5 md:flex-row"
                   >
-                    <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-xl shadow-sm md:aspect-auto md:h-40 md:w-56">
-                      <img
+                    <div className="relative aspect-16/10 w-full shrink-0 overflow-hidden rounded-xl shadow-sm md:aspect-auto md:h-40 md:w-56">
+                      <Image
                         src={course.thumbnail}
                         alt={course.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       <div className="absolute top-3 left-3">
                         <span
@@ -227,9 +230,12 @@ const Catalog: React.FC = () => {
 
                         <div className="flex flex-wrap items-center gap-4">
                           <div className="flex items-center space-x-2">
-                            <img
+                            <Image
                               src={course.instructor.avatar}
-                              className="h-6 w-6 rounded-full border border-[#F1F5F9]"
+                              alt={course.instructor.name}
+                              width={24}
+                              height={24}
+                              className="rounded-full border border-[#F1F5F9]"
                             />
                             <span className="text-xs font-medium text-[#475569]">{course.instructor.name}</span>
                           </div>

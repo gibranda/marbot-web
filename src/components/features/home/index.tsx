@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 "use client";
 import {
   CheckCircle,
@@ -17,6 +16,7 @@ import {
   MessageSquare,
   BookOpen,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
@@ -137,7 +137,7 @@ const Home: React.FC = () => {
 
             {/* Visual Mockup */}
             <div className="group relative hidden lg:block">
-              <div className="absolute inset-0 scale-105 rotate-3 rounded-2xl bg-gradient-to-tr from-[#14B8A6] to-[#99F6E4] opacity-20 blur-2xl transition-transform group-hover:rotate-6"></div>
+              <div className="absolute inset-0 scale-105 rotate-3 rounded-2xl bg-linear-to-tr from-[#14B8A6] to-[#99F6E4] opacity-20 blur-2xl transition-transform group-hover:rotate-6"></div>
               <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
                 <div className="flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
                   <div className="flex space-x-2">
@@ -234,7 +234,7 @@ const Home: React.FC = () => {
               },
             ].map((item, idx) => (
               <div
-                key={idx}
+                key={item.desc}
                 className="stagger-item rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-all duration-500 hover:shadow-md md:p-8"
                 style={{ transitionDelay: `${idx * 150}ms` }}
               >
@@ -275,7 +275,7 @@ const Home: React.FC = () => {
             {MOCK_COURSES.slice(0, 5).map((course, idx) => (
               <div
                 key={course.id}
-                className="stagger-item w-[280px] shrink-0 snap-start transition-all duration-500 sm:w-[320px] md:w-[380px]"
+                className="stagger-item w-70 shrink-0 snap-start transition-all duration-500 sm:w-[320px] md:w-95"
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
                 <CourseCard course={course} />
@@ -325,11 +325,13 @@ const Home: React.FC = () => {
                   className="stagger-item group flex flex-col"
                   style={{ transitionDelay: `${idx * 150}ms` }}
                 >
-                  <div className="relative mb-8 aspect-[3/4] overflow-hidden rounded-xl bg-[#F8FAFC] shadow-sm transition-all group-hover:shadow-md">
-                    <img
+                  <div className="relative mb-8 aspect-3/4 overflow-hidden rounded-xl bg-[#F8FAFC] shadow-sm transition-all group-hover:shadow-md">
+                    <Image
                       src={instructor.avatar}
                       alt={instructor.name}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-4 left-4">
                       <div className="rounded-lg border border-white bg-white/95 px-3 py-1.5 text-[9px] font-bold tracking-widest text-[#14B8A6] uppercase shadow-sm backdrop-blur-md">
@@ -338,14 +340,14 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-grow flex-col text-center sm:text-left">
+                  <div className="flex grow flex-col text-center sm:text-left">
                     <h3 className="mb-1 text-lg font-extrabold text-[#0F172A] transition-colors group-hover:text-[#14B8A6] md:text-xl">
                       {instructor.name}
                     </h3>
                     <p className="mb-3 text-[10px] font-bold tracking-widest text-[#14B8A6] uppercase md:text-xs">
                       {instructor.role}
                     </p>
-                    <p className="mb-6 line-clamp-2 min-h-[2.5rem] text-xs leading-relaxed text-[#64748B] md:text-sm">
+                    <p className="mb-6 line-clamp-2 min-h-10 text-xs leading-relaxed text-[#64748B] md:text-sm">
                       {instructor.bio}
                     </p>
 
@@ -482,11 +484,7 @@ const Home: React.FC = () => {
         ref={addToRevealRefs}
       >
         <div className="pointer-events-none absolute top-0 right-0 p-8 opacity-10 md:p-24">
-          <Layout
-            size={120}
-            strokeWidth={0.5}
-            className="text-white md:h-[240px] md:w-[240px] lg:h-[300px] lg:w-[300px]"
-          />
+          <Layout size={120} strokeWidth={0.5} className="text-white md:h-60 md:w-60 lg:h-75 lg:w-75" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -566,7 +564,7 @@ const Home: React.FC = () => {
                 <div className="space-y-4">
                   {FAQS.map((faq, idx) => (
                     <div
-                      key={idx}
+                      key={faq.question}
                       className={`stagger-item rounded-xl border transition-all duration-300 ${
                         openFaq === idx
                           ? "border-[#14B8A6] bg-[#F0FDFA] shadow-sm"

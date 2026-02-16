@@ -1,15 +1,15 @@
 import { Suspense } from "react";
 
-import Home from "@/components/features/home";
+import BelajarDetail from "@/components/features/belajar/detail";
 import Footer from "@/components/layouts/Footer";
 import Navbar from "@/components/layouts/Navbar";
 
-export default function HomePage() {
+export default function BelajarDetailPage() {
   return (
-    <main className="grow">
+    <main>
       <Suspense>
         <Navbar />
-        <Home />
+        <BelajarDetail />
         <Footer />
       </Suspense>
     </main>

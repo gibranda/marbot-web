@@ -1,5 +1,6 @@
 "use client";
 import { Search, Star, Users, ChevronDown, Sparkles } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 
@@ -105,7 +106,13 @@ const Instructors: React.FC = () => {
               >
                 <div className="mb-6 flex items-start justify-between">
                   <div className="relative">
-                    <img src={instructor.avatar} className="h-20 w-20 rounded-xl object-cover" />
+                    <Image
+                      src={instructor.avatar}
+                      alt={instructor.name}
+                      width={80}
+                      height={80}
+                      className="rounded-xl object-cover"
+                    />
                     <div className="absolute -right-2 -bottom-2 flex h-7 w-7 items-center justify-center rounded-lg border-2 border-white bg-[#14B8A6] text-white">
                       <Star size={12} className="fill-white" />
                     </div>
@@ -120,7 +127,7 @@ const Instructors: React.FC = () => {
                 <h3 className="mb-2 text-xl font-bold text-[#0F172A] transition-colors group-hover:text-[#14B8A6]">
                   {instructor.name}
                 </h3>
-                <p className="mb-6 flex-grow text-sm leading-relaxed text-[#64748B]">{instructor.bio}</p>
+                <p className="mb-6 grow text-sm leading-relaxed text-[#64748B]">{instructor.bio}</p>
 
                 <div className="grid grid-cols-3 gap-4 border-t border-[#F1F5F9] py-6">
                   <div className="border-r border-[#F1F5F9] text-center">

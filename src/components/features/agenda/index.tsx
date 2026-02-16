@@ -3,6 +3,7 @@
 "use client";
 
 import { Search, Calendar, MapPin, Globe, ChevronRight, Users, LayoutGrid, List, Clock, Ticket } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 
@@ -87,7 +88,7 @@ const AgendaList: React.FC = () => {
 
           <div className="flex w-full shrink-0 items-center space-x-4 md:w-auto">
             {/* View Mode Toggle */}
-            <div className="flex rounded-[12px] border border-[#E2E8F0] bg-white p-1 shadow-sm">
+            <div className="flex rounded-xl border border-[#E2E8F0] bg-white p-1 shadow-sm">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`tap-target flex items-center justify-center rounded-lg p-1.5 transition-all ${viewMode === "grid" ? "bg-[#14B8A6] text-white shadow-sm" : "text-[#94A3B8] hover:text-[#14B8A6]"}`}
@@ -127,10 +128,12 @@ const AgendaList: React.FC = () => {
                   className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm transition-all hover:border-[#14B8A6] hover:shadow-xl"
                 >
                   <div className="relative aspect-video">
-                    <img
+                    <Image
                       src={agenda.cover}
                       alt={agenda.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-4 left-4 flex gap-2">
                       <span
@@ -143,7 +146,7 @@ const AgendaList: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-grow flex-col p-6 md:p-8">
+                  <div className="flex grow flex-col p-6 md:p-8">
                     <div className="mb-3 flex items-center space-x-2 text-[10px] font-bold tracking-[0.15em] text-[#14B8A6] uppercase">
                       <Calendar size={12} />
                       <span>
@@ -151,7 +154,7 @@ const AgendaList: React.FC = () => {
                       </span>
                     </div>
 
-                    <h3 className="mb-4 line-clamp-2 min-h-[3.5rem] text-xl font-extrabold text-[#0F172A] transition-colors group-hover:text-[#14B8A6]">
+                    <h3 className="mb-4 line-clamp-2 min-h-14 text-xl font-extrabold text-[#0F172A] transition-colors group-hover:text-[#14B8A6]">
                       {agenda.title}
                     </h3>
 
@@ -208,7 +211,13 @@ const AgendaList: React.FC = () => {
 
                   {/* Image Column (Mobile Only) */}
                   <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-xl md:hidden">
-                    <img src={agenda.cover} className="h-full w-full object-cover" />
+                    <Image
+                      src={agenda.cover}
+                      alt={agenda.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
                     <div className="absolute top-3 left-3 flex gap-2">
                       <span
                         className={`rounded-lg bg-white/90 px-3 py-1 text-[9px] font-extrabold uppercase shadow-sm backdrop-blur ${agenda.type === "Online" ? "text-blue-600" : "text-amber-600"}`}
@@ -227,11 +236,11 @@ const AgendaList: React.FC = () => {
                       >
                         {agenda.type}
                       </span>
-                      <div className="flex items-center space-x-2 text-[10px] font-bold tracking-[0.1em] text-[#64748B] uppercase">
+                      <div className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-[#64748B] uppercase">
                         <Clock size={12} className="text-[#14B8A6]" />
                         <span>{agenda.time} WIB</span>
                       </div>
-                      <div className="flex items-center space-x-2 text-[10px] font-bold tracking-[0.1em] text-[#64748B] uppercase md:hidden">
+                      <div className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-[#64748B] uppercase md:hidden">
                         <Calendar size={12} className="text-[#14B8A6]" />
                         <span>{agenda.date}</span>
                       </div>
@@ -248,7 +257,7 @@ const AgendaList: React.FC = () => {
                         ) : (
                           <MapPin size={14} className="shrink-0 text-[#14B8A6]" />
                         )}
-                        <span className="max-w-[200px] truncate">{agenda.locationName}</span>
+                        <span className="max-w-50 truncate">{agenda.locationName}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Users size={14} className="shrink-0 text-[#14B8A6]" />

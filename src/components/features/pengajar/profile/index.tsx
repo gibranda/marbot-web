@@ -1,8 +1,6 @@
-/* eslint-disable react/no-array-index-key */
-
 "use client";
-
 import { ArrowLeft, Star, Users, BookOpen, MapPin, Globe, Share2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import React from "react";
@@ -34,10 +32,15 @@ const InstructorProfile: React.FC = () => {
           {/* Sidebar Profil */}
           <aside className="w-full shrink-0 lg:w-96">
             <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 text-center shadow-sm sm:p-8">
-              <img
-                src={instructor.avatar}
-                className="mx-auto mb-6 h-32 w-32 rounded-xl object-cover shadow-xl sm:h-40 sm:w-40"
-              />
+              <div className="relative mx-auto mb-6 h-32 w-32 sm:h-40 sm:w-40">
+                <Image
+                  src={instructor.avatar}
+                  alt={instructor.name}
+                  fill
+                  className="rounded-xl object-cover shadow-xl"
+                  sizes="(max-width: 640px) 128px, 160px"
+                />
+              </div>
               <h1 className="mb-2 text-xl font-extrabold text-[#0F172A] sm:text-2xl">{instructor.name}</h1>
               <div className="mb-8 inline-flex rounded-full bg-[#F0FDFA] px-4 py-1.5">
                 <span className="text-[10px] font-extrabold tracking-wider text-[#0F766E] uppercase sm:text-xs">
@@ -92,8 +95,8 @@ const InstructorProfile: React.FC = () => {
                     label: "Materi Praktis",
                     value: instructor.totalCourses.toString(),
                   },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center space-x-3 rounded-xl bg-[#F8FAFC] p-4">
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center space-x-3 rounded-xl bg-[#F8FAFC] p-4">
                     <div className="shrink-0">{item.icon}</div>
                     <div>
                       <div className="text-sm font-bold text-[#0F172A]">{item.value}</div>

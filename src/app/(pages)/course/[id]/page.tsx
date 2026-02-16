@@ -1,15 +1,15 @@
 import { Suspense } from "react";
 
-import Home from "@/components/features/home";
+import CourseDetail from "@/components/features/course/detail";
 import Footer from "@/components/layouts/Footer";
 import Navbar from "@/components/layouts/Navbar";
 
-export default function HomePage() {
+export default function CourseDetailPage() {
   return (
-    <main className="grow">
+    <main>
       <Suspense>
         <Navbar />
-        <Home />
+        <CourseDetail />
         <Footer />
       </Suspense>
     </main>

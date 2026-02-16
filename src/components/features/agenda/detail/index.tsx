@@ -1,5 +1,3 @@
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable sonarjs/no-nested-template-literals */
 "use client";
 
 import {
@@ -14,6 +12,7 @@ import {
   CalendarPlus,
   ShieldCheck,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
@@ -28,8 +27,9 @@ const AgendaDetail: React.FC = () => {
 
   const handleRegister = () => {
     const userStr = localStorage.getItem("marbot_user");
+    const uri = encodeURIComponent(`/agenda/${agenda.slug}/daftar`);
     if (!userStr) {
-      router.push(`/login?returnTo=${encodeURIComponent(`/agenda/${agenda.slug}/daftar`)}`);
+      router.push(`/login?returnTo=${uri}`);
       return;
     }
     router.push(`/agenda/${agenda.slug}/daftar`);
@@ -137,8 +137,11 @@ const AgendaDetail: React.FC = () => {
                     "Manajemen sumber daya takmir and marbot",
                     "Simulasi kasus umum and solusinya",
                     "Tanya jawab mendalam dengan praktisi",
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start space-x-3 rounded-xl border border-[#F1F5F9] bg-white p-4">
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="flex items-start space-x-3 rounded-xl border border-[#F1F5F9] bg-white p-4"
+                    >
                       <CheckCircle size={20} className="mt-0.5 shrink-0 text-[#14B8A6]" />
                       <span className="text-sm font-medium text-[#475569]">{item}</span>
                     </div>
@@ -149,8 +152,14 @@ const AgendaDetail: React.FC = () => {
               <section>
                 <h3 className="mb-6 text-xl font-bold text-[#0F172A]">Narasumber</h3>
                 <div className="flex items-center space-x-6 rounded-2xl border border-[#E2E8F0] bg-white p-6">
-                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-[#F1F5F9] bg-[#F8FAFC]">
-                    <img src="https://picsum.photos/seed/narasumber/200/200" className="h-full w-full object-cover" />
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-[#F1F5F9] bg-[#F8FAFC]">
+                    <Image
+                      src="https://picsum.photos/seed/narasumber/200/200"
+                      alt="Narasumber"
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
                   </div>
                   <div>
                     <h4 className="text-lg font-bold text-[#0F172A]">{agenda.narasumber}</h4>
@@ -201,8 +210,14 @@ const AgendaDetail: React.FC = () => {
           <aside className="w-full lg:w-96">
             <div className="space-y-8 lg:sticky lg:top-32">
               <div className="overflow-hidden rounded-2xl border-2 border-[#14B8A6] bg-white shadow-2xl shadow-[#14B8A6]/10">
-                <div className="aspect-video">
-                  <img src={agenda.cover} className="h-full w-full object-cover" />
+                <div className="relative aspect-video">
+                  <Image
+                    src={agenda.cover}
+                    alt={agenda.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
                 </div>
 
                 <div className="p-8">
@@ -245,8 +260,8 @@ const AgendaDetail: React.FC = () => {
                         "Modul Materi (PDF)",
                         "Rekaman Workshop (Online)",
                         "Konsumsi (Offline Only)",
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-center space-x-3 text-sm text-[#475569]">
+                      ].map((item) => (
+                        <li key={item} className="flex items-center space-x-3 text-sm text-[#475569]">
                           <ShieldCheck size={16} className="shrink-0 text-[#14B8A6]" />
                           <span>{item}</span>
                         </li>

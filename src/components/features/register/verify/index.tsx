@@ -1,5 +1,6 @@
 "use client";
 import { Mail, RefreshCw, ArrowLeft } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -10,7 +11,14 @@ const RegisterVerify: React.FC = () => {
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8FAFC] p-4">
       <div className="animate-fadeIn w-full max-w-md overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-xl">
         <div className="border-b border-[#F1F5F9] p-8 text-center">
-          <img src={LOGO_URL} alt="Marbot LMS" className="mx-auto mb-8 h-10 w-auto" />
+          <Image
+            src={LOGO_URL}
+            alt="Marbot LMS"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="mx-auto mb-8 h-10 w-auto"
+          />
 
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#F0FDFA] text-[#14B8A6]">
             <Mail size={40} />

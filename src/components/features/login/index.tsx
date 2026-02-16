@@ -1,6 +1,4 @@
 /* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable sonarjs/no-all-duplicated-branches */
 /* eslint-disable sonarjs/no-nested-conditional */
 "use client";
 import {
@@ -16,6 +14,7 @@ import {
   EyeOff,
   AlertCircle,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
@@ -140,9 +139,9 @@ const Auth: React.FC = () => {
                 title: "Akses Seumur Hidup",
                 desc: "Belajar kapan saja, di mana saja dari HP Anda.",
               },
-            ].map((prop, i) => (
+            ].map((prop) => (
               <div
-                key={i}
+                key={prop.desc}
                 className="flex items-start space-x-4 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
               >
                 <div className="mt-1 text-[#99F6E4]">{prop.icon}</div>
@@ -170,7 +169,7 @@ const Auth: React.FC = () => {
 
         <div className="w-full max-w-md">
           <div className="mb-10 text-center">
-            <img src={LOGO_URL} alt="Logo" className="mx-auto mb-6 h-10 w-auto" />
+            <Image src={LOGO_URL} alt="Logo" width={0} height={0} sizes="100vw" className="mx-auto mb-6 h-10 w-auto" />
             <h1 className="mb-2 text-2xl font-extrabold text-[#0F172A]">
               {isLogin ? "Selamat Datang Kembali!" : "Buat Akun Baru"}
             </h1>
@@ -207,9 +206,7 @@ const Auth: React.FC = () => {
             )}
 
             <div>
-              <label className="mb-2 block text-sm font-bold text-[#0F172A]">
-                {isLogin ? "Email atau No. HP" : "Email atau No. HP"}
-              </label>
+              <label className="mb-2 block text-sm font-bold text-[#0F172A]">Email atau No. HP</label>
               <div className="relative">
                 {isLogin || !emailOrPhone ? (
                   <Mail className="absolute top-1/2 left-4 -translate-y-1/2 text-[#94A3B8]" size={18} />
