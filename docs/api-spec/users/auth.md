@@ -37,22 +37,22 @@ Mendaftarkan pengguna baru.
 
 ```json
 {
-  "success": true,
-  "message": "Registrasi berhasil. Silakan verifikasi email/telepon Anda.",
   "data": {
     "user": {
       "id": "uuid-string",
       "name": "Ahmad Fauzi",
       "email": "ahmad@email.com",
       "phone": "081234567890",
-      "role": "student",
+      "role": "STUDENT",
+      "status": "INACTIVE",
       "created_at": "2025-01-15T10:00:00Z"
     },
     "verification": {
       "method": "email",
       "expires_at": "2025-01-15T10:10:00Z"
     }
-  }
+  },
+  "message": "Registrasi berhasil. Silakan verifikasi email Anda."
 }
 ```
 
@@ -60,7 +60,6 @@ Mendaftarkan pengguna baru.
 
 ```json
 {
-  "success": false,
   "message": "Validasi gagal",
   "errors": {
     "email": ["Email sudah terdaftar"],
@@ -69,7 +68,7 @@ Mendaftarkan pengguna baru.
 }
 ```
 
-**Halaman terkait:** `/register` — [Auth.tsx](../../src/pages/Auth.tsx)
+**Halaman terkait:** `/register` — [Auth.tsx](../../pages/Auth.tsx)
 
 ---
 
@@ -98,31 +97,33 @@ Verifikasi kode OTP setelah registrasi.
 
 ```json
 {
-  "success": true,
-  "message": "Verifikasi berhasil. Akun Anda telah aktif.",
   "data": {
     "user": {
       "id": "uuid-string",
       "name": "Ahmad Fauzi",
       "email": "ahmad@email.com",
-      "role": "student",
-      "status": "active"
+      "role": "STUDENT",
+      "status": "ACTIVE"
     },
-    "token": "eyJhbGciOiJIUzI1NiIs..."
-  }
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+    "expires_in": 86400
+  },
+  "message": "Verifikasi berhasil. Akun Anda telah aktif."
 }
 ```
+
+> **Catatan**: Setelah verifikasi berhasil, server langsung mengembalikan `token` + `refresh_token` agar user tidak perlu login ulang. OTP record di tabel `otp_verifications` di-set `is_used = TRUE` dan `used_at = NOW()`.
 
 ### Response — 400 Bad Request
 
 ```json
 {
-  "success": false,
   "message": "Kode OTP tidak valid atau sudah kedaluwarsa"
 }
 ```
 
-**Halaman terkait:** `/register/verify` — [RegisterVerify.tsx](../../src/pages/RegisterVerify.tsx)
+**Halaman terkait:** `/register/verify` — [RegisterVerify.tsx](../../pages/RegisterVerify.tsx)
 
 ---
 
@@ -145,11 +146,10 @@ Mengirim ulang kode OTP.
 
 ```json
 {
-  "success": true,
-  "message": "Kode OTP baru telah dikirim",
   "data": {
     "expires_at": "2025-01-15T10:20:00Z"
-  }
+  },
+  "message": "Kode OTP baru telah dikirim"
 }
 ```
 
@@ -157,7 +157,6 @@ Mengirim ulang kode OTP.
 
 ```json
 {
-  "success": false,
   "message": "Terlalu banyak permintaan. Coba lagi dalam 60 detik."
 }
 ```
@@ -189,29 +188,30 @@ Autentikasi pengguna yang sudah terdaftar.
 
 ```json
 {
-  "success": true,
-  "message": "Login berhasil",
   "data": {
     "user": {
       "id": "uuid-string",
       "name": "Ahmad Fauzi",
       "email": "ahmad@email.com",
       "phone": "081234567890",
-      "role": "student",
-      "avatar": "https://storage.example.com/avatars/uuid.jpg"
+      "role": "STUDENT",
+      "status": "ACTIVE",
+      "avatar_url": "https://storage.example.com/avatars/uuid.jpg"
     },
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
     "expires_in": 86400
-  }
+  },
+  "message": "Login berhasil"
 }
 ```
+
+> **Catatan**: `refresh_token` disimpan di tabel `refresh_tokens` (hash-nya). `last_login_at` di-update pada tabel `users`.
 
 ### Response — 401 Unauthorized
 
 ```json
 {
-  "success": false,
   "message": "Email/telepon atau password salah"
 }
 ```
@@ -220,12 +220,11 @@ Autentikasi pengguna yang sudah terdaftar.
 
 ```json
 {
-  "success": false,
   "message": "Akun belum diverifikasi. Silakan verifikasi terlebih dahulu."
 }
 ```
 
-**Halaman terkait:** `/login` — [Auth.tsx](../../src/pages/Auth.tsx)
+**Halaman terkait:** `/login` — [Auth.tsx](../../pages/Auth.tsx)
 
 ---
 
@@ -248,12 +247,21 @@ Memperbarui access token menggunakan refresh token.
 
 ```json
 {
-  "success": true,
   "data": {
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
     "expires_in": 86400
   }
+}
+```
+
+> **Catatan**: Implementasi menggunakan **refresh token rotation** — setiap kali refresh berhasil, refresh token lama di-revoke (`revoked_at = NOW()`) dan token baru diterbitkan. Ini mencegah replay attacks.
+
+### Response — 401 Unauthorized
+
+```json
+{
+  "message": "Refresh token tidak valid atau sudah kedaluwarsa"
 }
 ```
 
@@ -276,16 +284,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ```json
 {
-  "success": true,
   "message": "Logout berhasil"
 }
 ```
+
+> **Catatan**: Server me-revoke refresh token di tabel `refresh_tokens` (`revoked_at = NOW()`).
 
 ---
 
 ## 7. Forgot Password
 
-Mengirim link reset password.
+Mengirim kode OTP untuk reset password ke email.
 
 **Endpoint:** `POST /api/v1/auth/forgot-password`
 **Auth:** Tidak diperlukan
@@ -302,16 +311,20 @@ Mengirim link reset password.
 
 ```json
 {
-  "success": true,
-  "message": "Link reset password telah dikirim ke email Anda"
+  "data": {
+    "expires_at": "2025-01-15T10:10:00Z"
+  },
+  "message": "Kode OTP reset password telah dikirim ke email Anda"
 }
 ```
+
+> **Catatan**: Membuat record baru di `otp_verifications` dengan `purpose = RESET_PASSWORD`. Response selalu 200 meskipun email tidak terdaftar (untuk mencegah email enumeration).
 
 ---
 
 ## 8. Reset Password
 
-Reset password menggunakan token dari email.
+Reset password menggunakan kode OTP dari email.
 
 **Endpoint:** `POST /api/v1/auth/reset-password`
 **Auth:** Tidak diperlukan
@@ -320,18 +333,35 @@ Reset password menggunakan token dari email.
 
 ```json
 {
-  "token": "reset-token-string",
+  "email": "ahmad@email.com",
+  "otp_code": "123456",
   "password": "newpassword123",
   "password_confirmation": "newpassword123"
 }
 ```
 
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| email | string | Ya | Email yang terdaftar |
+| otp_code | string | Ya | 6 digit kode OTP (purpose: RESET_PASSWORD) |
+| password | string | Ya | Min 8 karakter |
+| password_confirmation | string | Ya | Harus sama dengan password |
+
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
   "message": "Password berhasil diubah. Silakan login dengan password baru."
+}
+```
+
+> **Catatan**: Setelah berhasil, semua `refresh_tokens` user di-revoke (force logout dari semua device). OTP di-set `is_used = TRUE`.
+
+### Response — 400 Bad Request
+
+```json
+{
+  "message": "Kode OTP tidak valid atau sudah kedaluwarsa"
 }
 ```
 
@@ -345,7 +375,7 @@ Reset password menggunakan token dari email.
   "sub": "user-uuid",
   "name": "Ahmad Fauzi",
   "email": "ahmad@email.com",
-  "role": "student",
+  "role": "STUDENT",
   "iat": 1705312800,
   "exp": 1705399200
 }
@@ -355,7 +385,6 @@ Reset password menggunakan token dari email.
 Semua endpoint menggunakan format error yang konsisten:
 ```json
 {
-  "success": false,
   "message": "Deskripsi error",
   "errors": {}
 }

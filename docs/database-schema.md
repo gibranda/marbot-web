@@ -121,6 +121,13 @@
 | `QRIS` | Pembayaran via scan QR code | User pilih metode pembayaran saat checkout | User pilih di halaman checkout |
 | `VIRTUAL_ACCOUNT` | Virtual account bank | User pilih metode pembayaran saat checkout | User pilih di halaman checkout |
 
+### DiscountType
+
+| Value | Deskripsi | Kapan Digunakan | Cara Pengisian |
+|-------|-----------|-----------------|----------------|
+| `PERCENTAGE` | Diskon dalam persen | Kupon memberikan potongan persentase dari harga | Admin input persentase (misal: 20 = 20%) |
+| `FIXED` | Diskon nominal tetap | Kupon memberikan potongan rupiah tetap | Admin input nominal (misal: 50000 = Rp50.000) |
+
 ### AgendaType
 
 | Value | Deskripsi | Kapan Digunakan | Cara Pengisian |
@@ -187,6 +194,9 @@ Menyimpan data semua pengguna platform (admin & student).
 | `role` | `UserRole` | NOT NULL, DEFAULT 'STUDENT' | Role pengguna |
 | `status` | `UserStatus` | NOT NULL, DEFAULT 'ACTIVE' | Status akun |
 | `avatar_url` | `TEXT` | NULLABLE | URL foto profil |
+| `bio` | `TEXT` | NULLABLE | Bio singkat pengguna |
+| `institution` | `VARCHAR(255)` | NULLABLE | Nama institusi/masjid asal |
+| `location` | `VARCHAR(255)` | NULLABLE | Domisili/kota |
 | `email_verified_at` | `TIMESTAMPTZ` | NULLABLE | Waktu verifikasi email |
 | `phone_verified_at` | `TIMESTAMPTZ` | NULLABLE | Waktu verifikasi telepon |
 | `last_login_at` | `TIMESTAMPTZ` | NULLABLE | Login terakhir |
@@ -649,7 +659,10 @@ Menyimpan riwayat semua transaksi pembayaran.
 | `user_id` | `UUID` | FK → users.id, NOT NULL | Pembeli |
 | `course_id` | `UUID` | FK → courses.id, NULLABLE | Kursus (jika beli kursus) |
 | `agenda_id` | `UUID` | FK → agendas.id, NULLABLE | Agenda (jika daftar agenda) |
-| `amount` | `DECIMAL(12,2)` | NOT NULL | Jumlah pembayaran |
+| `coupon_id` | `UUID` | FK → coupons.id, NULLABLE | Kupon yang digunakan |
+| `original_amount` | `DECIMAL(12,2)` | NOT NULL | Harga asli sebelum diskon |
+| `discount` | `DECIMAL(12,2)` | NOT NULL, DEFAULT 0 | Jumlah potongan harga |
+| `amount` | `DECIMAL(12,2)` | NOT NULL | Jumlah pembayaran akhir (original_amount - discount) |
 | `payment_method` | `PaymentMethod` | NOT NULL | Metode pembayaran |
 | `status` | `TransactionStatus` | NOT NULL, DEFAULT 'PENDING' | Status transaksi |
 | `paid_at` | `TIMESTAMPTZ` | NULLABLE | Waktu pembayaran berhasil |
@@ -747,6 +760,7 @@ Menyimpan data pendaftaran peserta ke agenda/workshop.
 | `user_id` | `UUID` | FK → users.id, NOT NULL | Peserta |
 | `agenda_id` | `UUID` | FK → agendas.id, NOT NULL | Agenda |
 | `transaction_id` | `UUID` | FK → transactions.id, NULLABLE | Transaksi pembayaran terkait (NULL untuk agenda gratis) |
+| `registration_number` | `VARCHAR(50)` | NOT NULL, UNIQUE | Nomor registrasi unik (e-ticket) |
 | `status` | `RegistrationStatus` | NOT NULL, DEFAULT 'PENDING' | Status pendaftaran |
 | `registered_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Tanggal pendaftaran |
 | `confirmed_at` | `TIMESTAMPTZ` | NULLABLE | Tanggal konfirmasi |
@@ -795,6 +809,120 @@ Menyimpan notifikasi untuk pengguna (in-app notifications).
 
 ---
 
+### 23. `faqs`
+
+Menyimpan data FAQ yang ditampilkan di halaman landing.
+
+| Column | Type | Constraints | Deskripsi |
+|--------|------|-------------|-----------|
+| `id` | `UUID` | PK, DEFAULT uuid_generate_v4() | Primary key |
+| `question` | `VARCHAR(500)` | NOT NULL | Pertanyaan |
+| `answer` | `TEXT` | NOT NULL | Jawaban |
+| `sort_order` | `INTEGER` | NOT NULL, DEFAULT 0 | Urutan tampil |
+| `is_published` | `BOOLEAN` | NOT NULL, DEFAULT TRUE | Tampil di publik |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu dibuat |
+| `updated_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu terakhir diubah |
+
+**Indexes:**
+- `idx_faqs_sort_order` — on `sort_order`
+- `idx_faqs_is_published` — on `is_published`
+
+---
+
+### 24. `coupons`
+
+Menyimpan data kupon diskon yang dapat digunakan pada checkout.
+
+| Column | Type | Constraints | Deskripsi |
+|--------|------|-------------|-----------|
+| `id` | `UUID` | PK, DEFAULT uuid_generate_v4() | Primary key |
+| `code` | `VARCHAR(50)` | NOT NULL, UNIQUE | Kode kupon (uppercase) |
+| `description` | `VARCHAR(255)` | NULLABLE | Deskripsi kupon |
+| `discount_type` | `DiscountType` | NOT NULL | Tipe diskon |
+| `discount_value` | `DECIMAL(12,2)` | NOT NULL | Nilai diskon (nominal atau persentase) |
+| `min_purchase` | `DECIMAL(12,2)` | NULLABLE | Minimal pembelian |
+| `max_discount` | `DECIMAL(12,2)` | NULLABLE | Maksimal potongan (untuk tipe PERCENTAGE) |
+| `max_uses` | `INTEGER` | NULLABLE | Batas penggunaan (NULL = unlimited) |
+| `used_count` | `INTEGER` | NOT NULL, DEFAULT 0 | Jumlah penggunaan saat ini |
+| `valid_from` | `TIMESTAMPTZ` | NOT NULL | Berlaku mulai |
+| `valid_until` | `TIMESTAMPTZ` | NOT NULL | Berlaku sampai |
+| `is_active` | `BOOLEAN` | NOT NULL, DEFAULT TRUE | Status aktif |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu dibuat |
+| `updated_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu terakhir diubah |
+
+**Indexes:**
+- `idx_coupons_code` — UNIQUE on `code`
+- `idx_coupons_valid_dates` — on (`valid_from`, `valid_until`)
+- `idx_coupons_is_active` — on `is_active`
+
+> **Catatan**: Validasi kupon harus memeriksa: `is_active = TRUE`, `NOW() BETWEEN valid_from AND valid_until`, dan `used_count < max_uses` (jika `max_uses` NOT NULL). `used_count` di-increment secara atomic saat transaksi berhasil.
+
+---
+
+### 25. `site_settings`
+
+Menyimpan konfigurasi dinamis situs (hero section, statistik landing, dsb).
+
+| Column | Type | Constraints | Deskripsi |
+|--------|------|-------------|-----------|
+| `id` | `UUID` | PK, DEFAULT uuid_generate_v4() | Primary key |
+| `key` | `VARCHAR(100)` | NOT NULL, UNIQUE | Kunci konfigurasi (misal: `hero_title`, `hero_subtitle`, `stats_masjid`) |
+| `value` | `TEXT` | NOT NULL | Nilai konfigurasi |
+| `type` | `VARCHAR(20)` | NOT NULL, DEFAULT 'STRING' | Tipe data: STRING, NUMBER, BOOLEAN, JSON |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu dibuat |
+| `updated_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu terakhir diubah |
+
+**Indexes:**
+- `idx_site_settings_key` — UNIQUE on `key`
+
+> **Catatan**: Digunakan untuk konten hero landing page, statistik platform, dsb. Cache di application layer dengan TTL pendek (misal 5 menit).
+
+---
+
+### 26. `notification_preferences`
+
+Menyimpan preferensi notifikasi per pengguna.
+
+| Column | Type | Constraints | Deskripsi |
+|--------|------|-------------|-----------|
+| `id` | `UUID` | PK, DEFAULT uuid_generate_v4() | Primary key |
+| `user_id` | `UUID` | FK → users.id, NOT NULL, ON DELETE CASCADE, UNIQUE | Pengguna |
+| `email_notifications` | `BOOLEAN` | NOT NULL, DEFAULT TRUE | Terima notifikasi email |
+| `course_updates` | `BOOLEAN` | NOT NULL, DEFAULT TRUE | Update kursus yang diikuti |
+| `agenda_reminders` | `BOOLEAN` | NOT NULL, DEFAULT TRUE | Pengingat agenda |
+| `promotional` | `BOOLEAN` | NOT NULL, DEFAULT TRUE | Penawaran & promo |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu dibuat |
+| `updated_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu terakhir diubah |
+
+**Indexes:**
+- `idx_notification_prefs_user_id` — UNIQUE on `user_id`
+
+> **Catatan**: Row dibuat saat user pertama kali mengubah setting notifikasi (lazy creation). Default semua TRUE jika row belum ada.
+
+---
+
+### 27. `discussion_votes`
+
+Menyimpan upvote pada balasan diskusi (forum).
+
+| Column | Type | Constraints | Deskripsi |
+|--------|------|-------------|-----------|
+| `id` | `UUID` | PK, DEFAULT uuid_generate_v4() | Primary key |
+| `user_id` | `UUID` | FK → users.id, NOT NULL, ON DELETE CASCADE | Pengguna yang vote |
+| `reply_id` | `UUID` | FK → discussion_replies.id, NOT NULL, ON DELETE CASCADE | Balasan yang di-vote |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL, DEFAULT NOW() | Waktu vote |
+
+**Constraints:**
+- `uq_discussion_votes_user_reply` — UNIQUE on (`user_id`, `reply_id`)
+
+**Indexes:**
+- `idx_discussion_votes_reply_id` — on `reply_id`
+- `idx_discussion_votes_user_id` — on `user_id`
+
+> **Catatan**: Hanya mendukung upvote (tidak ada downvote). Vote count per reply dihitung via `COUNT(discussion_votes) WHERE reply_id = ?`.
+
+---
+
 ## Entity Relationship Diagram
 
 ```mermaid
@@ -809,6 +937,8 @@ erDiagram
     users ||--o{ agenda_registrations : "registers"
     users ||--o{ discussion_threads : "creates"
     users ||--o{ discussion_replies : "writes"
+    users ||--o| notification_preferences : "has"
+    users ||--o{ discussion_votes : "votes"
 
     categories ||--o{ courses : "contains"
     specializations ||--o{ instructor_specializations : "has"
@@ -840,6 +970,9 @@ erDiagram
 
     discussion_threads ||--o{ discussion_replies : "has"
     discussion_replies ||--o{ discussion_replies : "nested"
+    discussion_replies ||--o{ discussion_votes : "has"
+
+    coupons ||--o{ transactions : "applied to"
 
     users {
         UUID id PK
@@ -850,6 +983,9 @@ erDiagram
         UserRole role
         UserStatus status
         TEXT avatar_url
+        TEXT bio
+        VARCHAR institution
+        VARCHAR location
         TIMESTAMPTZ email_verified_at
         TIMESTAMPTZ phone_verified_at
         TIMESTAMPTZ last_login_at
@@ -1076,6 +1212,9 @@ erDiagram
         UUID user_id FK
         UUID course_id FK
         UUID agenda_id FK
+        UUID coupon_id FK
+        DECIMAL original_amount
+        DECIMAL discount
         DECIMAL amount
         PaymentMethod payment_method
         TransactionStatus status
@@ -1129,6 +1268,7 @@ erDiagram
         UUID user_id FK
         UUID agenda_id FK
         UUID transaction_id FK
+        VARCHAR registration_number UK
         RegistrationStatus status
         TIMESTAMPTZ registered_at
         TIMESTAMPTZ confirmed_at
@@ -1148,6 +1288,60 @@ erDiagram
         VARCHAR reference_type
         BOOLEAN is_read
         TIMESTAMPTZ read_at
+        TIMESTAMPTZ created_at
+    }
+
+    faqs {
+        UUID id PK
+        VARCHAR question
+        TEXT answer
+        INTEGER sort_order
+        BOOLEAN is_published
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    coupons {
+        UUID id PK
+        VARCHAR code UK
+        VARCHAR description
+        DiscountType discount_type
+        DECIMAL discount_value
+        DECIMAL min_purchase
+        DECIMAL max_discount
+        INTEGER max_uses
+        INTEGER used_count
+        TIMESTAMPTZ valid_from
+        TIMESTAMPTZ valid_until
+        BOOLEAN is_active
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    site_settings {
+        UUID id PK
+        VARCHAR key UK
+        TEXT value
+        VARCHAR type
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    notification_preferences {
+        UUID id PK
+        UUID user_id FK
+        BOOLEAN email_notifications
+        BOOLEAN course_updates
+        BOOLEAN agenda_reminders
+        BOOLEAN promotional
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    discussion_votes {
+        UUID id PK
+        UUID user_id FK
+        UUID reply_id FK
         TIMESTAMPTZ created_at
     }
 ```
@@ -1174,6 +1368,7 @@ Field berikut **tidak disimpan di tabel**, melainkan dihitung via query saat dib
 | Agenda registrants count | `COUNT(agenda_registrations) WHERE agenda_id = ?` | Admin panel |
 | Agenda remaining quota | `agendas.quota - COUNT(agenda_registrations WHERE status != 'CANCELLED')` | Detail agenda |
 | Discussion thread replies count | `COUNT(discussion_replies) WHERE thread_id = ?` | Forum |
+| Discussion reply votes count | `COUNT(discussion_votes) WHERE reply_id = ?` | Forum upvote |
 | Enrollment progress | `(completed_lessons / total_lessons) * 100` dari `lesson_progress` | Dashboard peserta |
 
 > **Tips**: Untuk performa di halaman listing, gunakan database views atau query dengan subquery/join. Jika traffic tinggi, pertimbangkan caching di application layer (Redis).
@@ -1279,3 +1474,8 @@ Query default harus menyertakan `WHERE deleted_at IS NULL`.
 | 20 | `agendas` | Agenda/workshop | Ya | Ya |
 | 21 | `agenda_registrations` | Pendaftaran agenda | - | - |
 | 22 | `notifications` | Notifikasi in-app | - | - |
+| 23 | `faqs` | FAQ landing page | - | - |
+| 24 | `coupons` | Kupon diskon | - | - |
+| 25 | `site_settings` | Konfigurasi situs | - | - |
+| 26 | `notification_preferences` | Preferensi notifikasi user | - | - |
+| 27 | `discussion_votes` | Vote balasan diskusi | - | - |

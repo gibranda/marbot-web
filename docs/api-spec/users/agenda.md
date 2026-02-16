@@ -19,51 +19,48 @@ Mengambil daftar agenda/workshop dengan filter.
 |-----------|------|---------|------------|
 | page | number | 1 | Nomor halaman |
 | per_page | number | 12 | Jumlah per halaman |
-| search | string | - | Pencarian berdasarkan judul |
-| type | string | - | Filter: `Online`, `Offline` |
-| price | string | - | Filter: `free`, `paid` |
+| q | string | - | Pencarian berdasarkan judul |
+| type | string | - | Filter: `ONLINE`, `OFFLINE`, `HYBRID` |
+| pricing | string | - | Filter: `free`, `paid` |
 | status | string | `upcoming` | Filter: `upcoming`, `past` |
-| sort | string | `date_asc` | Sorting: `date_asc`, `date_desc`, `price_asc`, `price_desc` |
+| sort | string | `date` | Sorting: `date`, `-date`, `price`, `-price` |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "data": {
-    "agenda": [
-      {
-        "id": "uuid-string",
-        "slug": "workshop-manajemen-keuangan-masjid",
-        "title": "Workshop Manajemen Keuangan Masjid",
-        "type": "Online",
-        "date": "2025-02-15",
-        "time": "09:00",
-        "end_time": "12:00",
-        "location": "Zoom Meeting",
-        "location_name": "Online via Zoom",
-        "price": 150000,
-        "price_display": "Rp 150.000",
-        "quota": 50,
-        "remaining_quota": 23,
-        "narasumber": "Ustadz Dr. H. Muhammad Ridwan, M.Si",
-        "cover": "https://storage.example.com/agenda/cover-1.jpg",
-        "status": "Published"
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "per_page": 12,
-      "total": 6,
-      "total_pages": 1,
-      "has_next": false,
-      "has_prev": false
+  "data": [
+    {
+      "id": "uuid-string",
+      "slug": "workshop-manajemen-keuangan-masjid",
+      "title": "Workshop Manajemen Keuangan Masjid",
+      "type": "ONLINE",
+      "date": "2025-02-15",
+      "start_time": "09:00",
+      "end_time": "12:00",
+      "location": "Zoom Meeting",
+      "location_name": "Online via Zoom",
+      "price": 150000,
+      "price_display": "Rp 150.000",
+      "quota": 50,
+      "remaining_quota": 23,
+      "speaker": "Ustadz Dr. H. Muhammad Ridwan, M.Si",
+      "cover_url": "https://storage.example.com/agenda/cover-1.jpg",
+      "status": "PUBLISHED"
     }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 12,
+    "total": 6,
+    "total_pages": 1
   }
 }
 ```
 
-**Halaman terkait:** `/agenda` — [AgendaList.tsx](../../src/pages/agenda/AgendaList.tsx)
+> **Catatan**: Hanya menampilkan agenda dengan `status = PUBLISHED`. `remaining_quota` dihitung via `quota - COUNT(agenda_registrations WHERE status != 'CANCELLED')`. Filter `upcoming` = `date >= TODAY`, `past` = `date < TODAY`.
+
+**Halaman terkait:** `/agenda` — [AgendaList.tsx](../../pages/agenda/AgendaList.tsx)
 
 ---
 
@@ -84,14 +81,13 @@ Mengambil informasi lengkap satu agenda.
 
 ```json
 {
-  "success": true,
   "data": {
     "id": "uuid-string",
     "slug": "workshop-manajemen-keuangan-masjid",
     "title": "Workshop Manajemen Keuangan Masjid",
-    "type": "Online",
+    "type": "ONLINE",
     "date": "2025-02-15",
-    "time": "09:00",
+    "start_time": "09:00",
     "end_time": "12:00",
     "location": "Zoom Meeting",
     "location_name": "Online via Zoom",
@@ -100,9 +96,9 @@ Mengambil informasi lengkap satu agenda.
     "quota": 50,
     "remaining_quota": 23,
     "description": "Workshop ini membahas tata kelola keuangan masjid yang transparan dan akuntabel. Peserta akan mempelajari cara menyusun laporan keuangan, pengelolaan dana infaq/sedekah, dan audit keuangan masjid.",
-    "narasumber": "Ustadz Dr. H. Muhammad Ridwan, M.Si",
-    "cover": "https://storage.example.com/agenda/cover-1.jpg",
-    "status": "Published",
+    "speaker": "Ustadz Dr. H. Muhammad Ridwan, M.Si",
+    "cover_url": "https://storage.example.com/agenda/cover-1.jpg",
+    "status": "PUBLISHED",
     "registrants_count": 27,
     "is_registered": false,
     "benefits": [
@@ -115,16 +111,17 @@ Mengambil informasi lengkap satu agenda.
 }
 ```
 
+> **Catatan**: `benefits` adalah data statis yang disimpan sebagai JSON di field `description` atau sebagai konvensi di level aplikasi (hardcoded per agenda atau bagian dari `description` yang di-parse). Jika perlu fleksibel, bisa ditambahkan kolom `benefits JSONB` di tabel `agendas`.
+
 ### Response — 404 Not Found
 
 ```json
 {
-  "success": false,
   "message": "Agenda tidak ditemukan"
 }
 ```
 
-**Halaman terkait:** `/agenda/:slug` — [AgendaDetail.tsx](../../src/pages/agenda/AgendaDetail.tsx)
+**Halaman terkait:** `/agenda/:slug` — [AgendaDetail.tsx](../../pages/agenda/AgendaDetail.tsx)
 
 ---
 
@@ -133,7 +130,7 @@ Mengambil informasi lengkap satu agenda.
 Mendaftarkan user ke agenda gratis.
 
 **Endpoint:** `POST /api/v1/agenda/:slug/register`
-**Auth:** Bearer Token (Required, role: student)
+**Auth:** Bearer Token (Required, role: STUDENT)
 
 ### Path Parameters
 
@@ -157,32 +154,32 @@ Mendaftarkan user ke agenda gratis.
 | name | string | Ya | Min 3 karakter |
 | email | string | Ya | Format email valid |
 | phone | string | Ya | Format telepon valid |
-| institution | string | Tidak | Nama institusi/masjid |
+| institution | string | Tidak | Nama institusi/masjid (disimpan ke `users.institution` jika belum ada) |
 
 ### Response — 201 Created
 
 ```json
 {
-  "success": true,
-  "message": "Pendaftaran berhasil",
   "data": {
     "registration": {
       "id": "uuid-string",
       "agenda_id": "uuid-string",
       "user_id": "uuid-string",
-      "status": "confirmed",
-      "registered_at": "2025-01-15T10:00:00Z",
-      "registration_number": "AGD-2025-0028"
+      "status": "CONFIRMED",
+      "registration_number": "AGD-2025-0028",
+      "registered_at": "2025-01-15T10:00:00Z"
     }
-  }
+  },
+  "message": "Pendaftaran berhasil"
 }
 ```
+
+> **Catatan**: Untuk agenda gratis, status langsung `CONFIRMED`. `registration_number` di-generate otomatis sebagai e-ticket reference. Field `institution` dari request body di-update ke `users.institution` jika user belum punya data institusi.
 
 ### Response — 400 Bad Request
 
 ```json
 {
-  "success": false,
   "message": "Anda sudah terdaftar di agenda ini"
 }
 ```
@@ -191,7 +188,6 @@ Mendaftarkan user ke agenda gratis.
 
 ```json
 {
-  "success": false,
   "message": "Kuota agenda sudah penuh"
 }
 ```
@@ -203,7 +199,7 @@ Mendaftarkan user ke agenda gratis.
 Membuat order pembayaran untuk agenda berbayar.
 
 **Endpoint:** `POST /api/v1/agenda/:slug/checkout`
-**Auth:** Bearer Token (Required, role: student)
+**Auth:** Bearer Token (Required, role: STUDENT)
 
 ### Path Parameters
 
@@ -219,7 +215,7 @@ Membuat order pembayaran untuk agenda berbayar.
   "email": "ahmad@email.com",
   "phone": "081234567890",
   "institution": "Masjid Al-Ikhlas",
-  "payment_method": "bank_transfer"
+  "payment_method": "BANK_TRANSFER"
 }
 ```
 
@@ -229,35 +225,38 @@ Membuat order pembayaran untuk agenda berbayar.
 | email | string | Ya | Format email valid |
 | phone | string | Ya | Format telepon valid |
 | institution | string | Tidak | Nama institusi/masjid |
-| payment_method | string | Ya | `bank_transfer`, `e_wallet`, `qris` |
+| payment_method | string | Ya | `BANK_TRANSFER`, `E_WALLET`, `QRIS`, `VIRTUAL_ACCOUNT` |
 
 ### Response — 201 Created
 
 ```json
 {
-  "success": true,
-  "message": "Order berhasil dibuat. Silakan selesaikan pembayaran.",
   "data": {
     "order": {
       "id": "uuid-string",
-      "invoice": "INV-AGD-2025-0015",
+      "invoice_number": "INV-AGD-2025-0015",
       "agenda_id": "uuid-string",
+      "original_amount": 150000,
+      "discount": 0,
       "amount": 150000,
-      "payment_method": "bank_transfer",
+      "payment_method": "BANK_TRANSFER",
       "payment_details": {
         "bank_name": "Bank Syariah Indonesia",
         "account_number": "1234567890",
         "account_name": "Marbot LMS",
         "va_number": "8001234567890"
       },
-      "status": "pending",
+      "status": "PENDING",
       "expires_at": "2025-01-16T10:00:00Z"
     }
-  }
+  },
+  "message": "Order berhasil dibuat. Silakan selesaikan pembayaran."
 }
 ```
 
-**Halaman terkait:** `/agenda/:slug/daftar` — [AgendaCheckout.tsx](../../src/pages/agenda/AgendaCheckout.tsx)
+> **Catatan**: Membuat record di `transactions` (agenda_id terisi, course_id NULL) dan `agenda_registrations` (status PENDING). Setelah pembayaran sukses (via webhook), registration di-update ke CONFIRMED.
+
+**Halaman terkait:** `/agenda/:slug/daftar` — [AgendaCheckout.tsx](../../pages/agenda/AgendaCheckout.tsx)
 
 ---
 
@@ -266,7 +265,7 @@ Membuat order pembayaran untuk agenda berbayar.
 Mengambil daftar agenda yang sudah didaftarkan user.
 
 **Endpoint:** `GET /api/v1/me/agenda`
-**Auth:** Bearer Token (Required, role: student)
+**Auth:** Bearer Token (Required, role: STUDENT)
 
 ### Query Parameters
 
@@ -280,38 +279,35 @@ Mengambil daftar agenda yang sudah didaftarkan user.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "registrations": [
-      {
+  "data": [
+    {
+      "id": "uuid-string",
+      "agenda": {
         "id": "uuid-string",
-        "agenda": {
-          "id": "uuid-string",
-          "slug": "workshop-manajemen-keuangan-masjid",
-          "title": "Workshop Manajemen Keuangan Masjid",
-          "type": "Online",
-          "date": "2025-02-15",
-          "time": "09:00",
-          "end_time": "12:00",
-          "location_name": "Online via Zoom",
-          "cover": "https://storage.example.com/agenda/cover-1.jpg"
-        },
-        "status": "confirmed",
-        "registration_number": "AGD-2025-0028",
-        "registered_at": "2025-01-15T10:00:00Z"
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "per_page": 10,
-      "total": 2,
-      "total_pages": 1
+        "slug": "workshop-manajemen-keuangan-masjid",
+        "title": "Workshop Manajemen Keuangan Masjid",
+        "type": "ONLINE",
+        "date": "2025-02-15",
+        "start_time": "09:00",
+        "end_time": "12:00",
+        "location_name": "Online via Zoom",
+        "cover_url": "https://storage.example.com/agenda/cover-1.jpg"
+      },
+      "status": "CONFIRMED",
+      "registration_number": "AGD-2025-0028",
+      "registered_at": "2025-01-15T10:00:00Z"
     }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 10,
+    "total": 2,
+    "total_pages": 1
   }
 }
 ```
 
-**Halaman terkait:** `/akun/agenda` — [UserDashboard.tsx](../../src/pages/user/UserDashboard.tsx)
+**Halaman terkait:** `/akun/agenda` — [UserDashboard.tsx](../../pages/UserDashboard.tsx)
 
 ---
 
@@ -320,7 +316,7 @@ Mengambil daftar agenda yang sudah didaftarkan user.
 Membatalkan registrasi agenda.
 
 **Endpoint:** `POST /api/v1/me/agenda/:id/cancel`
-**Auth:** Bearer Token (Required, role: student)
+**Auth:** Bearer Token (Required, role: STUDENT)
 
 ### Path Parameters
 
@@ -332,16 +328,16 @@ Membatalkan registrasi agenda.
 
 ```json
 {
-  "success": true,
   "message": "Pendaftaran berhasil dibatalkan"
 }
 ```
+
+> **Catatan**: Set `agenda_registrations.status = CANCELLED`, `cancelled_at = NOW()`. Hanya bisa cancel jika agenda belum berlangsung (`agendas.date > TODAY`).
 
 ### Response — 400 Bad Request
 
 ```json
 {
-  "success": false,
   "message": "Tidak dapat membatalkan. Agenda sudah berlangsung."
 }
 ```

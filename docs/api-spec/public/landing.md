@@ -17,7 +17,6 @@ Mengambil data yang diperlukan untuk landing page.
 
 ```json
 {
-  "success": true,
   "data": {
     "hero": {
       "title": "Tingkatkan Kompetensi Pengelolaan Masjid Anda",
@@ -35,34 +34,62 @@ Mengambil data yang diperlukan untuk landing page.
       {
         "id": "uuid-string",
         "title": "Standar Operasional Kebersihan Masjid",
-        "category": "Kebersihan",
-        "level": "Pemula",
+        "slug": "standar-operasional-kebersihan-masjid",
+        "category": {
+          "id": "uuid-string",
+          "name": "Kebersihan",
+          "slug": "kebersihan"
+        },
+        "level": "BEGINNER",
         "price": 0,
         "price_display": "Gratis",
-        "thumbnail": "https://storage.example.com/courses/thumb-1.jpg",
+        "thumbnail_url": "https://storage.example.com/courses/thumb-1.jpg",
         "instructor": {
+          "id": "uuid-string",
           "name": "Ustadz Ahmad Fauzi",
-          "avatar": "https://storage.example.com/avatars/instructor-1.jpg"
+          "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg"
         },
         "rating": 4.8,
         "students_count": 1200,
         "duration": "4 jam 30 menit",
-        "modules_count": 12
+        "lessons_count": 12
       }
     ],
     "featured_instructors": [
       {
         "id": "uuid-string",
         "name": "Ustadz Ahmad Fauzi",
-        "role": "Pakar Kebersihan Masjid",
-        "avatar": "https://storage.example.com/avatars/instructor-1.jpg",
+        "specializations": [
+          {
+            "id": "uuid-string",
+            "name": "Kebersihan & Sanitasi",
+            "slug": "kebersihan-sanitasi"
+          }
+        ],
+        "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg",
         "rating": 4.9,
         "total_courses": 5,
         "total_students": 3500
       }
     ],
+    "featured_threads": [
+      {
+        "id": "uuid-string",
+        "title": "Tips Mengelola Kebersihan Masjid Saat Ramadhan",
+        "body_preview": "Selama bulan Ramadhan, tantangan kebersihan masjid meningkat...",
+        "user": {
+          "id": "uuid-string",
+          "name": "Budi Santoso",
+          "avatar_url": "https://storage.example.com/avatars/user-1.jpg",
+          "institution": "Masjid Al-Ikhlas"
+        },
+        "replies_count": 12,
+        "created_at": "2025-01-12T00:00:00Z"
+      }
+    ],
     "faqs": [
       {
+        "id": "uuid-string",
         "question": "Apa itu Marbot LMS?",
         "answer": "Marbot LMS adalah platform pembelajaran online yang dirancang khusus untuk meningkatkan kompetensi pengelola masjid..."
       }
@@ -71,7 +98,9 @@ Mengambil data yang diperlukan untuk landing page.
 }
 ```
 
-**Halaman terkait:** `/` — [Home.tsx](../../src/pages/Home.tsx)
+> **Catatan**: Data `hero` dan `stats` diambil dari tabel `site_settings`. `featured_courses` diambil berdasarkan rating tertinggi (limit 6). `featured_instructors` berdasarkan total peserta (limit 6). `featured_threads` dari `discussion_threads` terbaru (limit 3). `faqs` dari tabel `faqs` WHERE `is_published = TRUE` ORDER BY `sort_order`.
+
+**Halaman terkait:** `/` — [Home.tsx](../../pages/Home.tsx)
 
 ---
 
@@ -86,49 +115,48 @@ Mengambil daftar FAQ.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "faqs": [
-      {
-        "id": "uuid-string",
-        "question": "Apa itu Marbot LMS?",
-        "answer": "Marbot LMS adalah platform pembelajaran online yang dirancang khusus untuk meningkatkan kompetensi pengelola masjid di Indonesia.",
-        "order": 1
-      },
-      {
-        "id": "uuid-string",
-        "question": "Apakah kursus di Marbot LMS gratis?",
-        "answer": "Kami menyediakan kursus gratis dan berbayar. Kursus gratis dapat langsung diakses setelah mendaftar.",
-        "order": 2
-      },
-      {
-        "id": "uuid-string",
-        "question": "Bagaimana cara mendapatkan sertifikat?",
-        "answer": "Sertifikat diberikan secara otomatis setelah Anda menyelesaikan seluruh modul dalam kursus.",
-        "order": 3
-      },
-      {
-        "id": "uuid-string",
-        "question": "Apakah materi bisa diakses kapan saja?",
-        "answer": "Ya, semua materi kursus dapat diakses 24/7 setelah Anda terdaftar.",
-        "order": 4
-      },
-      {
-        "id": "uuid-string",
-        "question": "Bagaimana cara mengikuti workshop?",
-        "answer": "Anda bisa mendaftar workshop melalui halaman Agenda. Pilih workshop yang diminati dan lakukan pendaftaran.",
-        "order": 5
-      },
-      {
-        "id": "uuid-string",
-        "question": "Apakah ada batasan waktu untuk menyelesaikan kursus?",
-        "answer": "Tidak ada batasan waktu. Anda bisa belajar sesuai kecepatan Anda sendiri.",
-        "order": 6
-      }
-    ]
-  }
+  "data": [
+    {
+      "id": "uuid-string",
+      "question": "Apa itu Marbot LMS?",
+      "answer": "Marbot LMS adalah platform pembelajaran online yang dirancang khusus untuk meningkatkan kompetensi pengelola masjid di Indonesia.",
+      "sort_order": 1
+    },
+    {
+      "id": "uuid-string",
+      "question": "Apakah kursus di Marbot LMS gratis?",
+      "answer": "Kami menyediakan kursus gratis dan berbayar. Kursus gratis dapat langsung diakses setelah mendaftar.",
+      "sort_order": 2
+    },
+    {
+      "id": "uuid-string",
+      "question": "Bagaimana cara mendapatkan sertifikat?",
+      "answer": "Sertifikat diberikan secara otomatis setelah Anda menyelesaikan seluruh modul dalam kursus.",
+      "sort_order": 3
+    },
+    {
+      "id": "uuid-string",
+      "question": "Apakah materi bisa diakses kapan saja?",
+      "answer": "Ya, semua materi kursus dapat diakses 24/7 setelah Anda terdaftar.",
+      "sort_order": 4
+    },
+    {
+      "id": "uuid-string",
+      "question": "Bagaimana cara mengikuti workshop?",
+      "answer": "Anda bisa mendaftar workshop melalui halaman Agenda. Pilih workshop yang diminati dan lakukan pendaftaran.",
+      "sort_order": 5
+    },
+    {
+      "id": "uuid-string",
+      "question": "Apakah ada batasan waktu untuk menyelesaikan kursus?",
+      "answer": "Tidak ada batasan waktu. Anda bisa belajar sesuai kecepatan Anda sendiri.",
+      "sort_order": 6
+    }
+  ]
 }
 ```
+
+> **Catatan**: Data dari tabel `faqs` WHERE `is_published = TRUE` ORDER BY `sort_order ASC`.
 
 ---
 
@@ -143,7 +171,6 @@ Mengambil statistik platform untuk ditampilkan di berbagai halaman.
 
 ```json
 {
-  "success": true,
   "data": {
     "total_courses": 24,
     "total_students": 5000,
@@ -153,3 +180,82 @@ Mengambil statistik platform untuk ditampilkan di berbagai halaman.
   }
 }
 ```
+
+> **Catatan**: Nilai bisa diambil dari `site_settings` (statis, di-update via admin) atau dihitung via computed query secara real-time tergantung kebutuhan performa.
+
+---
+
+## 4. Search Global
+
+Pencarian global untuk kursus, pengajar, dan agenda.
+
+**Endpoint:** `GET /api/v1/search`
+**Auth:** Tidak diperlukan
+
+### Query Parameters
+
+| Parameter | Type | Default | Keterangan |
+|-----------|------|---------|------------|
+| q | string | - | Kata kunci pencarian (required, min 2 karakter) |
+| type | string | - | Filter tipe: `course`, `instructor`, `agenda` (opsional, default semua) |
+| per_page | number | 10 | Jumlah per tipe |
+
+### Response — 200 OK
+
+```json
+{
+  "data": {
+    "courses": [
+      {
+        "id": "uuid-string",
+        "title": "Standar Operasional Kebersihan Masjid",
+        "slug": "standar-operasional-kebersihan-masjid",
+        "category": {
+          "id": "uuid-string",
+          "name": "Kebersihan",
+          "slug": "kebersihan"
+        },
+        "level": "BEGINNER",
+        "price": 0,
+        "price_display": "Gratis",
+        "thumbnail_url": "https://storage.example.com/courses/thumb-1.jpg",
+        "instructor": {
+          "id": "uuid-string",
+          "name": "Ustadz Ahmad Fauzi",
+          "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg"
+        },
+        "rating": 4.8,
+        "students_count": 1200
+      }
+    ],
+    "instructors": [
+      {
+        "id": "uuid-string",
+        "name": "Ustadz Ahmad Fauzi",
+        "specializations": [
+          {
+            "id": "uuid-string",
+            "name": "Kebersihan & Sanitasi",
+            "slug": "kebersihan-sanitasi"
+          }
+        ],
+        "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg",
+        "rating": 4.9,
+        "total_courses": 5
+      }
+    ],
+    "agenda": [
+      {
+        "id": "uuid-string",
+        "slug": "workshop-manajemen-keuangan-masjid",
+        "title": "Workshop Manajemen Keuangan Masjid",
+        "type": "ONLINE",
+        "date": "2025-02-15",
+        "cover_url": "https://storage.example.com/agenda/cover-1.jpg"
+      }
+    ]
+  }
+}
+```
+
+**Halaman terkait:** `/cari` — [SearchResults.tsx](../../pages/SearchResults.tsx)

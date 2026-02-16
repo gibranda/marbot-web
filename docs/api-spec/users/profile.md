@@ -11,13 +11,12 @@
 Mengambil ringkasan data dashboard user.
 
 **Endpoint:** `GET /api/v1/me/dashboard`
-**Auth:** Bearer Token (Required, role: student)
+**Auth:** Bearer Token (Required, role: STUDENT)
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
   "data": {
     "stats": {
       "active_courses": 3,
@@ -31,10 +30,10 @@ Mengambil ringkasan data dashboard user.
         "course": {
           "id": "uuid-string",
           "title": "Standar Operasional Kebersihan Masjid",
-          "thumbnail": "https://storage.example.com/courses/thumb-1.jpg"
+          "thumbnail_url": "https://storage.example.com/courses/thumb-1.jpg"
         },
         "progress": 45,
-        "last_accessed": "2025-01-14T08:30:00Z"
+        "last_accessed_at": "2025-01-14T08:30:00Z"
       }
     ],
     "upcoming_agenda": [
@@ -42,15 +41,15 @@ Mengambil ringkasan data dashboard user.
         "id": "uuid-string",
         "title": "Workshop Manajemen Keuangan Masjid",
         "date": "2025-02-15",
-        "time": "09:00",
-        "type": "Online"
+        "start_time": "09:00",
+        "type": "ONLINE"
       }
     ]
   }
 }
 ```
 
-**Halaman terkait:** `/akun` — [UserDashboard.tsx](../../src/pages/user/UserDashboard.tsx)
+**Halaman terkait:** `/akun` — [UserDashboard.tsx](../../pages/UserDashboard.tsx)
 
 ---
 
@@ -65,24 +64,23 @@ Mengambil data profil user.
 
 ```json
 {
-  "success": true,
   "data": {
     "id": "uuid-string",
     "name": "Ahmad Fauzi",
     "email": "ahmad@email.com",
     "phone": "081234567890",
-    "avatar": "https://storage.example.com/avatars/user-1.jpg",
+    "avatar_url": "https://storage.example.com/avatars/user-1.jpg",
     "institution": "Masjid Al-Ikhlas",
     "bio": "Marbot masjid yang ingin meningkatkan kompetensi",
     "location": "Jakarta Selatan",
-    "role": "student",
-    "status": "active",
-    "joined_at": "2025-01-01T00:00:00Z"
+    "role": "STUDENT",
+    "status": "ACTIVE",
+    "created_at": "2025-01-01T00:00:00Z"
   }
 }
 ```
 
-**Halaman terkait:** `/akun/profil` — [UserDashboard.tsx](../../src/pages/user/UserDashboard.tsx)
+**Halaman terkait:** `/akun/profil` — [UserDashboard.tsx](../../pages/UserDashboard.tsx)
 
 ---
 
@@ -109,26 +107,27 @@ Mengubah data profil user.
 |-------|------|----------|----------|
 | name | string | Tidak | Min 3 karakter |
 | phone | string | Tidak | Format telepon valid |
-| institution | string | Tidak | Max 100 karakter |
+| institution | string | Tidak | Max 255 karakter |
 | bio | string | Tidak | Max 500 karakter |
-| location | string | Tidak | Max 100 karakter |
+| location | string | Tidak | Max 255 karakter |
 
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
-  "message": "Profil berhasil diperbarui",
   "data": {
     "id": "uuid-string",
     "name": "Ahmad Fauzi, S.Pd",
     "email": "ahmad@email.com",
     "phone": "081234567891",
-    "avatar": "https://storage.example.com/avatars/user-1.jpg",
+    "avatar_url": "https://storage.example.com/avatars/user-1.jpg",
     "institution": "Masjid Al-Ikhlas Jakarta",
     "bio": "Marbot masjid berpengalaman 5 tahun",
-    "location": "Jakarta Selatan"
-  }
+    "location": "Jakarta Selatan",
+    "role": "STUDENT",
+    "status": "ACTIVE"
+  },
+  "message": "Profil berhasil diperbarui"
 }
 ```
 
@@ -152,11 +151,10 @@ Mengunggah foto profil user.
 
 ```json
 {
-  "success": true,
-  "message": "Foto profil berhasil diperbarui",
   "data": {
-    "avatar": "https://storage.example.com/avatars/user-1-new.jpg"
-  }
+    "avatar_url": "https://storage.example.com/avatars/user-1-new.jpg"
+  },
+  "message": "Foto profil berhasil diperbarui"
 }
 ```
 
@@ -164,7 +162,6 @@ Mengunggah foto profil user.
 
 ```json
 {
-  "success": false,
   "message": "Validasi gagal",
   "errors": {
     "avatar": ["Ukuran file maksimal 2MB"]
@@ -201,7 +198,6 @@ Mengubah password user.
 
 ```json
 {
-  "success": true,
   "message": "Password berhasil diubah"
 }
 ```
@@ -210,12 +206,11 @@ Mengubah password user.
 
 ```json
 {
-  "success": false,
   "message": "Password saat ini tidak sesuai"
 }
 ```
 
-**Halaman terkait:** `/akun/pengaturan` — [UserDashboard.tsx](../../src/pages/user/UserDashboard.tsx)
+**Halaman terkait:** `/akun/pengaturan` — [UserDashboard.tsx](../../pages/UserDashboard.tsx)
 
 ---
 
@@ -230,7 +225,6 @@ Mengambil preferensi notifikasi user.
 
 ```json
 {
-  "success": true,
   "data": {
     "email_notifications": true,
     "course_updates": true,
@@ -239,6 +233,8 @@ Mengambil preferensi notifikasi user.
   }
 }
 ```
+
+> **Catatan**: Jika record belum ada di tabel `notification_preferences`, return default (semua TRUE). Row dibuat secara lazy saat user pertama kali update.
 
 ---
 
@@ -260,14 +256,28 @@ Mengubah preferensi notifikasi.
 }
 ```
 
+| Field | Type | Required | Validasi |
+|-------|------|----------|----------|
+| email_notifications | boolean | Tidak | Default: true |
+| course_updates | boolean | Tidak | Default: true |
+| agenda_reminders | boolean | Tidak | Default: true |
+| promotional | boolean | Tidak | Default: true |
+
 ### Response — 200 OK
 
 ```json
 {
-  "success": true,
+  "data": {
+    "email_notifications": true,
+    "course_updates": true,
+    "agenda_reminders": true,
+    "promotional": false
+  },
   "message": "Pengaturan notifikasi berhasil diperbarui"
 }
 ```
+
+> **Catatan**: Menggunakan UPSERT — jika record belum ada di `notification_preferences`, buat baru; jika sudah ada, update.
 
 ---
 
@@ -296,7 +306,8 @@ Menghapus akun user (soft delete).
 
 ```json
 {
-  "success": true,
   "message": "Akun berhasil dihapus. Data Anda akan dihapus permanen dalam 30 hari."
 }
 ```
+
+> **Catatan**: Soft delete — set `users.deleted_at = NOW()`. Semua refresh tokens di-revoke. Akun bisa di-restore dalam 30 hari oleh admin. Setelah 30 hari, cron job menghapus data secara permanen.
