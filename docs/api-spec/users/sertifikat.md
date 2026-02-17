@@ -1,6 +1,8 @@
 # API Spec — Sertifikat (Users)
 
-> Endpoint untuk melihat dan mendownload sertifikat user.
+> Endpoint untuk melihat dan mendownload sertifikat user yang memerlukan autentikasi.
+>
+> **Endpoint publik** (verifikasi sertifikat) ada di [public/sertifikat.md](../public/sertifikat.md).
 
 **Base URL:** `/api/v1/me`
 
@@ -133,46 +135,3 @@ Mendownload sertifikat dalam format PDF.
 }
 ```
 
----
-
-## 4. Verifikasi Sertifikat (Public)
-
-Memverifikasi keaslian sertifikat. Endpoint publik untuk verifikasi.
-
-**Endpoint:** `GET /api/v1/certificates/verify/:certNumber`
-**Auth:** Tidak diperlukan
-
-### Path Parameters
-
-| Parameter | Type | Keterangan |
-|-----------|------|------------|
-| certNumber | string | Nomor sertifikat |
-
-### Response — 200 OK (Valid)
-
-```json
-{
-  "data": {
-    "is_valid": true,
-    "certificate_number": "MARBOT-2025-001",
-    "student_name": "Ahmad Fauzi",
-    "course_title": "Standar Operasional Kebersihan Masjid",
-    "issued_at": "2025-01-15T00:00:00Z",
-    "expired_at": null,
-    "issued_by": "Marbot LMS"
-  }
-}
-```
-
-### Response — 200 OK (Invalid)
-
-```json
-{
-  "data": {
-    "is_valid": false,
-    "message": "Nomor sertifikat tidak ditemukan dalam sistem"
-  }
-}
-```
-
-> **Catatan**: Jika `expired_at` tidak NULL dan sudah lewat, `is_valid` tetap TRUE tapi tambahkan field `is_expired: true` agar frontend bisa menampilkan status kadaluarsa.

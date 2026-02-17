@@ -1,239 +1,14 @@
 # API Spec — Kursus (Users)
 
-> Endpoint untuk browsing katalog, detail kursus, enrollment, dan learning experience.
+> Endpoint kursus yang memerlukan autentikasi: enrollment, learning, diskusi, dan review.
+>
+> **Endpoint publik** (katalog, detail, kategori, review list) ada di [public/kursus.md](../public/kursus.md).
 
 **Base URL:** `/api/v1`
 
 ---
 
-## 1. Get Katalog Kursus
-
-Mengambil daftar kursus dengan filter dan pagination.
-
-**Endpoint:** `GET /api/v1/courses`
-**Auth:** Tidak diperlukan (optional untuk info enrollment)
-
-### Query Parameters
-
-| Parameter | Type | Default | Keterangan |
-|-----------|------|---------|------------|
-| page | number | 1 | Nomor halaman |
-| per_page | number | 12 | Jumlah per halaman |
-| q | string | - | Pencarian berdasarkan judul |
-| category_id | string | - | Filter UUID kategori |
-| level | string | - | Filter level: `BEGINNER`, `INTERMEDIATE`, `ADVANCED` |
-| sort | string | `-created_at` | Sorting: `-created_at`, `-rating`, `-students`, `price`, `-price` |
-| pricing | string | - | Filter harga: `FREE`, `PAID` |
-
-### Response — 200 OK
-
-```json
-{
-  "data": [
-    {
-      "id": "uuid-string",
-      "title": "Standar Operasional Kebersihan Masjid",
-      "slug": "standar-operasional-kebersihan-masjid",
-      "summary": "Pelajari standar kebersihan masjid sesuai panduan terkini...",
-      "category": {
-        "id": "uuid-string",
-        "name": "Kebersihan",
-        "slug": "kebersihan"
-      },
-      "level": "BEGINNER",
-      "pricing": "FREE",
-      "price": 0,
-      "original_price": 0,
-      "price_display": "Gratis",
-      "thumbnail_url": "https://storage.example.com/courses/thumb-1.jpg",
-      "instructor": {
-        "id": "uuid-string",
-        "name": "Ustadz Ahmad Fauzi",
-        "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg"
-      },
-      "duration": "4 jam 30 menit",
-      "lessons_count": 12,
-      "rating": 4.8,
-      "students_count": 1200,
-      "updated_at": "2025-01-10T00:00:00Z"
-    }
-  ],
-  "meta": {
-    "current_page": 1,
-    "per_page": 12,
-    "total": 24,
-    "total_pages": 2
-  }
-}
-```
-
-> **Catatan**: Hanya menampilkan kursus dengan `status = PUBLISHED`. `pricing` diambil dari enum `CoursePricing` (FREE/PAID). `duration` dihitung dari `SUM(lessons.duration)`. `lessons_count` dihitung dari `COUNT(lessons)`.
-
-**Halaman terkait:** `/katalog` — [Catalog.tsx](../../pages/Catalog.tsx)
-
----
-
-## 2. Get Detail Kursus
-
-Mengambil informasi lengkap satu kursus.
-
-**Endpoint:** `GET /api/v1/courses/:slug`
-**Auth:** Tidak diperlukan (optional untuk status enrollment)
-
-### Path Parameters
-
-| Parameter | Type | Keterangan |
-|-----------|------|------------|
-| slug | string | Course slug |
-
-### Response — 200 OK
-
-```json
-{
-  "data": {
-    "id": "uuid-string",
-    "title": "Standar Operasional Kebersihan Masjid",
-    "slug": "standar-operasional-kebersihan-masjid",
-    "summary": "Pelajari standar kebersihan masjid sesuai panduan terkini",
-    "description": "Pelajari standar kebersihan masjid sesuai panduan terkini untuk menjaga kenyamanan jamaah...",
-    "category": {
-      "id": "uuid-string",
-      "name": "Kebersihan",
-      "slug": "kebersihan"
-    },
-    "level": "BEGINNER",
-    "pricing": "FREE",
-    "price": 0,
-    "original_price": 0,
-    "price_display": "Gratis",
-    "thumbnail_url": "https://storage.example.com/courses/thumb-1.jpg",
-    "video_promo_url": "https://www.youtube.com/embed/abc123",
-    "duration": "4 jam 30 menit",
-    "lessons_count": 12,
-    "rating": 4.8,
-    "students_count": 1200,
-    "has_certificate": true,
-    "has_lifetime_access": true,
-    "updated_at": "2025-01-10T00:00:00Z",
-    "instructor": {
-      "id": "uuid-string",
-      "name": "Ustadz Ahmad Fauzi",
-      "specializations": [
-        {
-          "id": "uuid-string",
-          "name": "Kebersihan & Sanitasi",
-          "slug": "kebersihan-sanitasi"
-        }
-      ],
-      "bio": "Berpengalaman 15 tahun dalam manajemen kebersihan masjid...",
-      "avatar_url": "https://storage.example.com/avatars/instructor-1.jpg",
-      "rating": 4.9,
-      "total_courses": 5,
-      "total_students": 3500
-    },
-    "learning_points": [
-      "Memahami dasar-dasar pengelolaan kebersihan masjid",
-      "Menggunakan peralatan kebersihan yang tepat",
-      "Menyusun jadwal kebersihan yang efisien"
-    ],
-    "sections": [
-      {
-        "id": "uuid-string",
-        "title": "Pengantar",
-        "category": "INTRODUCTION",
-        "sort_order": 0,
-        "duration": "25 menit",
-        "lessons_count": 2,
-        "lessons": [
-          {
-            "id": "uuid-string",
-            "title": "Pengantar Kebersihan Masjid",
-            "sort_order": 0,
-            "duration": 15,
-            "type": "VIDEO",
-            "is_free_preview": true
-          },
-          {
-            "id": "uuid-string",
-            "title": "Mengapa Kebersihan Penting?",
-            "sort_order": 1,
-            "duration": 10,
-            "type": "VIDEO",
-            "is_free_preview": false
-          }
-        ]
-      },
-      {
-        "id": "uuid-string",
-        "title": "Modul Pertama: Peralatan",
-        "category": "MAIN",
-        "sort_order": 1,
-        "duration": "30 menit",
-        "lessons_count": 2,
-        "lessons": [
-          {
-            "id": "uuid-string",
-            "title": "Peralatan dan Bahan Kebersihan",
-            "sort_order": 0,
-            "duration": 20,
-            "type": "VIDEO",
-            "is_free_preview": false
-          },
-          {
-            "id": "uuid-string",
-            "title": "Teknik Pembersihan Lantai Marmer",
-            "sort_order": 1,
-            "duration": 10,
-            "type": "TEXT",
-            "is_free_preview": false
-          }
-        ]
-      }
-    ],
-    "reviews": {
-      "summary": {
-        "average": 4.8,
-        "total": 150,
-        "distribution": {
-          "5": 100,
-          "4": 35,
-          "3": 10,
-          "2": 3,
-          "1": 2
-        }
-      },
-      "items": [
-        {
-          "id": "uuid-string",
-          "user": {
-            "name": "Budi Santoso",
-            "avatar_url": "https://storage.example.com/avatars/user-1.jpg"
-          },
-          "rating": 5,
-          "comment": "Materi sangat bermanfaat dan mudah dipahami",
-          "created_at": "2025-01-12T00:00:00Z"
-        }
-      ]
-    },
-    "is_enrolled": false,
-    "is_purchased": false
-  }
-}
-```
-
-### Response — 404 Not Found
-
-```json
-{
-  "message": "Kursus tidak ditemukan"
-}
-```
-
-**Halaman terkait:** `/course/:slug` — [CourseDetail.tsx](../../pages/CourseDetail.tsx)
-
----
-
-## 3. Enroll Kursus (Gratis)
+## 1. Enroll Kursus (Gratis)
 
 Mendaftarkan user ke kursus gratis.
 
@@ -282,7 +57,7 @@ Mendaftarkan user ke kursus gratis.
 
 ---
 
-## 4. Get Kursus Saya (Enrolled Courses)
+## 2. Get Kursus Saya (Enrolled Courses)
 
 Mengambil daftar kursus yang diikuti user.
 
@@ -334,7 +109,7 @@ Mengambil daftar kursus yang diikuti user.
 
 ---
 
-## 5. Get Course Player Data
+## 3. Get Course Player Data
 
 Mengambil data lengkap untuk belajar (course player).
 
@@ -425,7 +200,7 @@ Mengambil data lengkap untuk belajar (course player).
 
 ---
 
-## 6. Update Lesson Progress
+## 4. Update Lesson Progress
 
 Menandai lesson sebagai selesai.
 
@@ -486,7 +261,7 @@ Menandai lesson sebagai selesai.
 
 ---
 
-## 7. Get Diskusi per Lesson
+## 5. Get Diskusi per Lesson
 
 Mengambil daftar thread diskusi untuk lesson tertentu.
 
@@ -538,7 +313,7 @@ Mengambil daftar thread diskusi untuk lesson tertentu.
 
 ---
 
-## 8. Create Thread Diskusi
+## 6. Create Thread Diskusi
 
 Membuat thread diskusi baru pada lesson.
 
@@ -583,7 +358,7 @@ Membuat thread diskusi baru pada lesson.
 
 ---
 
-## 9. Get Replies Thread Diskusi
+## 7. Get Replies Thread Diskusi
 
 Mengambil balasan dari thread diskusi.
 
@@ -652,7 +427,7 @@ Mengambil balasan dari thread diskusi.
 
 ---
 
-## 10. Create Reply Diskusi
+## 8. Create Reply Diskusi
 
 Membalas thread atau reply diskusi.
 
@@ -696,7 +471,7 @@ Membalas thread atau reply diskusi.
 
 ---
 
-## 11. Vote Reply Diskusi
+## 9. Vote Reply Diskusi
 
 Toggle upvote pada reply diskusi.
 
@@ -739,7 +514,7 @@ Toggle upvote pada reply diskusi.
 
 ---
 
-## 12. Submit Review Kursus
+## 10. Submit Review Kursus
 
 Memberikan ulasan untuk kursus yang telah diikuti.
 
@@ -775,47 +550,3 @@ Memberikan ulasan untuk kursus yang telah diikuti.
   "message": "Ulasan berhasil ditambahkan"
 }
 ```
-
----
-
-## 13. Get Kategori Kursus
-
-Mengambil daftar kategori kursus yang tersedia.
-
-**Endpoint:** `GET /api/v1/categories`
-**Auth:** Tidak diperlukan
-
-### Response — 200 OK
-
-```json
-{
-  "data": [
-    {
-      "id": "uuid-string",
-      "name": "Kebersihan",
-      "slug": "kebersihan",
-      "courses_count": 5
-    },
-    {
-      "id": "uuid-string",
-      "name": "Keuangan",
-      "slug": "keuangan",
-      "courses_count": 3
-    },
-    {
-      "id": "uuid-string",
-      "name": "Manajemen",
-      "slug": "manajemen",
-      "courses_count": 6
-    },
-    {
-      "id": "uuid-string",
-      "name": "Teknologi",
-      "slug": "teknologi",
-      "courses_count": 2
-    }
-  ]
-}
-```
-
-> **Catatan**: Data dari tabel `categories`. `courses_count` dihitung dari kursus yang `status = PUBLISHED`.
