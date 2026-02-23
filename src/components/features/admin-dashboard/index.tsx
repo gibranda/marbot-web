@@ -192,21 +192,21 @@ const AdminDashboard: React.FC = React.memo(function AdminDashboard() {
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm sm:p-8">
-          <div className="mb-8 flex items-center justify-between">
-            <h2 className="font-extrabold text-[#0F172A]">Pembelajaran Terpopuler</h2>
-            <span className="text-[10px] font-extrabold tracking-widest text-[#64748B] uppercase">Bulan Ini</span>
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
+          <div className="border-b border-[#F1F5F9] p-6 sm:p-8">
+            <div className="flex items-center justify-between">
+              <h2 className="font-extrabold text-[#0F172A]">Pembelajaran Terpopuler</h2>
+              <span className="text-[10px] font-extrabold tracking-widest text-[#64748B] uppercase">Bulan Ini</span>
+            </div>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4 p-6 sm:p-8">
             {MOCK_COURSES.slice(0, 4).map((course, idx) => (
-              <div key={course.id} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-4 text-xs font-extrabold text-[#94A3B8]">{idx + 1}</div>
-                  <div className="max-w-[150px] truncate text-sm font-bold text-[#475569] sm:max-w-none">
-                    {course.title}
-                  </div>
+              <div key={course.id} className="flex min-w-0 items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center space-x-2 sm:space-x-3">
+                  <div className="shrink-0 text-xs font-extrabold text-[#94A3B8]">{idx + 1}</div>
+                  <div className="min-w-0 truncate text-sm font-bold text-[#475569]">{course.title}</div>
                 </div>
-                <div className="flex shrink-0 items-center space-x-2">
+                <div className="flex shrink-0 items-center space-x-1 sm:space-x-2">
                   <span className="text-xs font-extrabold text-[#0F172A]">{course.students}</span>
                   <Users size={12} className="text-[#94A3B8]" />
                 </div>
