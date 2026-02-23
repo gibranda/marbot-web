@@ -1,48 +1,20 @@
-/* eslint-disable sonarjs/no-nested-conditional */
-import {
-  BookOpen,
-  Users,
-  UserCircle,
-  TrendingUp,
-  Plus,
-  ArrowRight,
-  ChevronRight,
-  MoreVertical,
-  Calendar,
-  CheckCircle2,
-} from "lucide-react";
+import { ArrowRight, Calendar, CheckCircle2, ChevronRight, MoreVertical, Plus, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+import { ADMIN_DASHBOARD_KPI_DATA } from "@/constants/admin-dashboard.constants";
 import { MOCK_COURSES, MOCK_ACTIVITIES } from "@/constants/constants";
+import {
+  PATH_ADMIN_AKTIVITAS,
+  PATH_ADMIN_KURSUS,
+  PATH_ADMIN_KURSUS_BARU,
+  PATH_ADMIN_PENGAJAR_BARU,
+} from "@/constants/uri-path";
 
-const AdminDashboard: React.FC = () => {
-  const kpis = [
-    { label: "Total Kursus", value: "48", trend: "+4 bulan ini", icon: <BookOpen size={24} />, color: "bg-blue-500" },
-    {
-      label: "Total Pengajar",
-      value: "22",
-      trend: "+2 bulan ini",
-      icon: <UserCircle size={24} />,
-      color: "bg-purple-500",
-    },
-    {
-      label: "Total Peserta",
-      value: "12.540",
-      trend: "+850 bulan ini",
-      icon: <Users size={24} />,
-      color: "bg-[#14B8A6]",
-    },
-    {
-      label: "Pendapatan",
-      value: "Rp 18.5M",
-      trend: "+12% vs last month",
-      icon: <TrendingUp size={24} />,
-      color: "bg-amber-500",
-    },
-  ];
+import { formatInstructorName, getActivityDotColor, getCourseStatusStyle } from "./admin-dashboard.helpers";
 
+const AdminDashboard: React.FC = React.memo(function AdminDashboard() {
   return (
     <div className="animate-fadeIn space-y-10">
       {/* Header */}
@@ -53,14 +25,14 @@ const AdminDashboard: React.FC = () => {
         </div>
         <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
           <Link
-            href="/admin/pengajar/baru"
+            href={PATH_ADMIN_PENGAJAR_BARU}
             className="tap-target flex items-center justify-center rounded-xl border border-[#E2E8F0] bg-white px-5 py-2.5 text-sm font-bold text-[#0F172A] transition-all hover:bg-[#F8FAFC]"
           >
             <Plus size={18} className="mr-2" />
             Tambah Pengajar
           </Link>
           <Link
-            href="/admin/kursus/baru"
+            href={PATH_ADMIN_KURSUS_BARU}
             className="tap-target flex items-center justify-center rounded-xl bg-[#14B8A6] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#14B8A6]/20 transition-all hover:bg-[#0F766E]"
           >
             <Plus size={18} className="mr-2" />
@@ -71,9 +43,9 @@ const AdminDashboard: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => (
+        {ADMIN_DASHBOARD_KPI_DATA.map((kpi) => (
           <div
-            key={kpi.value}
+            key={kpi.id}
             className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-all hover:shadow-md"
           >
             <div className="mb-4 flex items-center justify-between">
@@ -94,8 +66,11 @@ const AdminDashboard: React.FC = () => {
         {/* Main Table: Kursus Terbaru */}
         <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm lg:col-span-2">
           <div className="flex items-center justify-between border-b border-[#F1F5F9] p-6 sm:p-8">
-            <h3 className="font-extrabold text-[#0F172A]">Kursus Terbaru</h3>
-            <Link href="/admin/kursus" className="flex items-center text-sm font-bold text-[#14B8A6] hover:underline">
+            <h2 className="font-extrabold text-[#0F172A]">Kursus Terbaru</h2>
+            <Link
+              href={PATH_ADMIN_KURSUS}
+              className="flex items-center text-sm font-bold text-[#14B8A6] hover:underline"
+            >
               Lihat Semua Pembelajaran <ChevronRight size={16} />
             </Link>
           </div>
@@ -144,9 +119,9 @@ const AdminDashboard: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`rounded-lg px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase ${
-                          course.status === "Published" ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600"
-                        }`}
+                        className={`rounded-lg px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase ${getCourseStatusStyle(
+                          course.status as "Published" | "Draft",
+                        )}`}
                       >
                         {course.status}
                       </span>
@@ -162,13 +137,17 @@ const AdminDashboard: React.FC = () => {
                           className="shrink-0 rounded-full"
                         />
                         <span className="max-w-[80px] truncate text-xs text-[#64748B]">
-                          {course.instructor.name.split(" ")[1]}
+                          {formatInstructorName(course.instructor.name)}
                         </span>
                       </div>
                     </td>
                     <td className="px-8 py-4 text-right">
-                      <button className="tap-target rounded-lg p-2 text-[#64748B] transition-all hover:bg-white hover:text-[#14B8A6]">
-                        <MoreVertical size={16} />
+                      <button
+                        className="tap-target rounded-lg p-2 text-[#64748B] transition-all hover:bg-white hover:text-[#14B8A6]"
+                        aria-label={`Opsi untuk kursus ${course.title}`}
+                        title={`Opsi untuk ${course.title}`}
+                      >
+                        <MoreVertical size={16} aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -181,19 +160,16 @@ const AdminDashboard: React.FC = () => {
         {/* Recent Activity */}
         <div className="flex flex-col rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
           <div className="border-b border-[#F1F5F9] p-6 sm:p-8">
-            <h3 className="font-extrabold text-[#0F172A]">Aktivitas Terbaru</h3>
+            <h2 className="font-extrabold text-[#0F172A]">Aktivitas Terbaru</h2>
           </div>
           <div className="space-y-6 p-6 sm:p-8">
             {MOCK_ACTIVITIES.map((activity) => (
               <div key={activity.id} className="flex space-x-4">
                 <div
-                  className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                    activity.type === "transaction"
-                      ? "bg-green-500"
-                      : activity.type === "course"
-                        ? "bg-blue-500"
-                        : "bg-[#14B8A6]"
-                  }`}
+                  className={`mt-1 h-2 w-2 shrink-0 rounded-full ${getActivityDotColor(
+                    activity.type as "transaction" | "course" | "student" | "instructor" | "certificate" | "agenda",
+                  )}`}
+                  aria-hidden="true"
                 ></div>
                 <div>
                   <div className="mb-1 text-sm leading-snug font-bold text-[#0F172A]">{activity.title}</div>
@@ -204,9 +180,12 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             ))}
-            <button className="tap-target mt-4 flex w-full items-center justify-center border-t border-[#F1F5F9] py-4 text-xs font-bold text-[#64748B] transition-colors hover:text-[#14B8A6]">
-              Lihat Log Lengkap <ArrowRight size={14} className="ml-2" />
-            </button>
+            <Link
+              href={PATH_ADMIN_AKTIVITAS}
+              className="tap-target mt-4 flex w-full items-center justify-center border-t border-[#F1F5F9] py-4 text-xs font-bold text-[#64748B] transition-colors hover:text-[#14B8A6]"
+            >
+              Lihat Log Lengkap <ArrowRight size={14} className="ml-2" aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </div>
@@ -215,7 +194,7 @@ const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm sm:p-8">
           <div className="mb-8 flex items-center justify-between">
-            <h3 className="font-extrabold text-[#0F172A]">Pembelajaran Terpopuler</h3>
+            <h2 className="font-extrabold text-[#0F172A]">Pembelajaran Terpopuler</h2>
             <span className="text-[10px] font-extrabold tracking-widest text-[#64748B] uppercase">Bulan Ini</span>
           </div>
           <div className="space-y-6">
@@ -238,20 +217,25 @@ const AdminDashboard: React.FC = () => {
 
         <div className="flex flex-col items-center justify-center rounded-2xl border border-[#E2E8F0] bg-white p-6 text-center shadow-sm sm:p-8">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F0FDFA] text-[#14B8A6]">
-            <CheckCircle2 size={32} />
+            <CheckCircle2 size={32} aria-hidden="true" />
           </div>
-          <h4 className="mb-2 font-extrabold text-[#0F172A]">Semua Sistem Normal</h4>
+          <h2 className="mb-2 font-extrabold text-[#0F172A]">Semua Sistem Normal</h2>
           <p className="mb-6 text-xs text-[#64748B]">
             Server LMS berjalan stabil tanpa kendala teknis dalam 24 jam terakhir.
           </p>
-          <div className="flex items-center space-x-2 rounded-full border border-green-100 bg-green-50 px-4 py-2">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+          <div
+            className="flex items-center space-x-2 rounded-full border border-green-100 bg-green-50 px-4 py-2"
+            role="status"
+            aria-live="polite"
+            aria-label="Status sistem: Operational"
+          >
+            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" aria-hidden="true"></div>
             <span className="text-[10px] font-extrabold tracking-wider text-green-600 uppercase">Operational</span>
           </div>
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default AdminDashboard;
